@@ -35,10 +35,6 @@ module.exports = {
           experimentalWatchApi: true,
         },
       },
-      {
-        test: /\.html$/i,
-        loader: "html-loader",
-      },
     ],
   },
   output: {
