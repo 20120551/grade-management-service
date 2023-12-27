@@ -1,0 +1,193 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id
+  name               String
+  email              String?
+  picture            String
+  userCourses        UserCourse[]
+  gradeReviews       GradeReview[]
+  gradeReviewResults GradeReviewResult[]
+  studentCards       StudentCard[]
+}
+
+model Course {
+  id              String           @id
+  name            String
+  desc            String?
+  code            String
+  createdAt       DateTime         @default(now()) @map("created_at")
+  background      String?
+  gradeStructures GradeStructure[]
+  invitations     Invitation[]
+  userCourses     UserCourse[]
+  students        Json?
+
+  @@map("course")
+}
+
+model Invitation {
+  id         String          @id
+  email      String
+  invitedBy  String          @map("invited_by")
+  courseId   String          @map("course_id")
+  state      InvitationState
+  createdAt  DateTime        @default(now()) @map("created_at")
+  role       UserCourseRole
+  course     Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userCourse UserCourse?
+
+  @@map("invitation")
+}
+
+model StudentCard {
+  id               String       @id @default(uuid())
+  studentId        String       @map("student_id")
+  name             String
+  birthday         String
+  cardExpiration   String       @map("card_expiration")
+  degree           String
+  department       String
+  studentCardImage String       @map("student_card_image")
+  universityName   String       @map("univeristy_name")
+  userId           String       @map("user_id")
+  user             User         @relation(fields: [userId], references: [id])
+  userCourses      UserCourse[]
+
+  @@map("student_card")
+}
+
+model UserCourse {
+  userId        String         @map("user_id")
+  courseId      String         @map("course_id")
+  role          UserCourseRole
+  invitationId  String?        @unique @map("invitation_id")
+  joinedAt      DateTime       @default(now()) @map("joined_at")
+  course        Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  invitation    Invitation?    @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentCardId String?        @map("student_card_id")
+  studentCard   StudentCard?   @relation(fields: [studentCardId], references: [id])
+
+  @@id([userId, courseId])
+  @@map("user_course")
+}
+
+model GradeStructure {
+  id         String      @id @default(uuid())
+  courseId   String      @unique @map("course_id")
+  name       String
+  status     GradeStatus
+  course     Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  gradeTypes GradeType[]
+
+  @@map("grade_structure")
+}
+
+model GradeType {
+  id               String              @id @default(uuid())
+  gradeStructureId String              @map("grade_structure_id")
+  percentage       Float
+  label            String
+  desc             String
+  type             SupportedGradeType?
+  status           GradeStatus
+  parentId         String?             @map("parent_id")
+  parent           GradeType?          @relation(name: "grade_sub_type", fields: [parentId], references: [id])
+  gradeStructure   GradeStructure      @relation(fields: [gradeStructureId], references: [id], onDelete: Cascade)
+  gradeSubTypes    GradeType[]         @relation(name: "grade_sub_type")
+  userCourseGrades UserCourseGrade[]
+
+  @@map("grade_type")
+}
+
+model UserCourseGrade {
+  id           String        @id @default(uuid())
+  gradeTypeId  String        @map("grade_type_id")
+  gradeType    GradeType     @relation(fields: [gradeTypeId], references: [id], onDelete: Cascade)
+  studentId    String        @map("student_id")
+  point        Float
+  gradeReviews GradeReview[]
+
+  @@unique([gradeTypeId, studentId])
+  @@map("user_course_grade")
+}
+
+model GradeReviewResult {
+  id            String                 @id @default(uuid())
+  point         Float
+  feedback      String
+  version       Int
+  teacherId     String                 @map("teacher_id")
+  gradeReviewId String                 @map("grade_review_id")
+  event         GradeReviewResultEvent
+  gradeReview   GradeReview            @relation(fields: [gradeReviewId], references: [id], onDelete: Cascade)
+  teacher       User                   @relation(fields: [teacherId], references: [id], onDelete: NoAction)
+
+  @@map("grade_review_result")
+}
+
+model GradeReview {
+  id                 String              @id @default(uuid())
+  topic              String
+  desc               String
+  userId             String              @map("user_id")
+  user               User                @relation(fields: [userId], references: [id], onDelete: NoAction)
+  expectedGrade      Float               @map("expected_grade")
+  userCourseGradeId  String              @map("user_course_grade_id")
+  status             GradeReviewStatus
+  userCourseGrade    UserCourseGrade     @relation(fields: [userCourseGradeId], references: [id], onDelete: Cascade)
+  gradeReviewResults GradeReviewResult[]
+
+  @@map("grade_review")
+}
+
+enum InvitationState {
+  PROCESSING
+  SENT
+  ACCEPTED
+  REJECTED
+
+  @@map("invitation_state")
+}
+
+enum UserCourseRole {
+  HOST
+  TEACHER
+  STUDENT
+
+  @@map("user_course_role")
+}
+
+enum GradeReviewStatus {
+  REQUEST
+  DONE
+}
+
+enum GradeReviewResultEvent {
+  ASSIGN
+  REASSIGN
+  DONE
+
+  @@map("grade_review_result_event")
+}
+
+enum GradeStatus {
+  CREATED
+  DONE
+
+  @@map("grade_status")
+}
+
+enum SupportedGradeType {
+  SUB
+  PARENT
+}

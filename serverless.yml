@@ -1,0 +1,33 @@
+service: graduate-course-service
+
+provider:
+  name: aws
+  architecture: x86_64
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-southeast-1'}
+  versionFunctions: false
+
+package: 
+  individually: true
+  excludeDevDependencies: true
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+  - serverless-webpack
+  - serverless-prune-plugin
+
+custom:
+  serverless-offline:
+    httpPort: 8000
+  prune:
+    automatic: true
+    number: 3
+  webpack:
+    webpackConfig: webpack.config.js
+    excludeFiles: test/
+    packager: npm
+
+functions:
+  - ${file(./src/functions/server/config.yml)}

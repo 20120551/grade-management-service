@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "esModuleInterop": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "allowJs": true,
+    "paths": {
+      "guards": ["./src/guards"],
+      "guards/*": ["./src/guards/*"],
+      "modules": ["./src/modules"],
+      "modules/*": ["./src/modules/*"],
+      "utils": ["./src/utils"],
+      "utils/*": ["./src/utils/*"],
+      "middleware": ["./src/middleware"],
+      "middleware/*": ["./src/middleware/*"],
+      "interceptors": ["./src/interceptors"],
+      "interceptors/*": ["./src/interceptors/*"],
+      "configurations": ["./src/configurations"],
+      "configurations/*": ["./src/configurations/*"],
+      "templates/*": ["./src/templates/*"],
+    },
+    "typeRoots": [
+      "node_modules/@types",
+      "src/types"
+    ]
+  },
+  "exclude": ["node_modules"],
+  "include": ["src/**/*"]
+}
