@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ReAssignGradeReviewResultCommand } from '../ReAssignGradeReviewResult.command';
+import { ReAssignGradeReviewResultCommand } from '../reAssignGradeReviewResult.command';
 import { GradeReview } from '@prisma/client';
 import { IGradeReviewRepo } from 'modules/review/repositories';
 import { BadRequestException } from 'utils/errors/domain.error';
