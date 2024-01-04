@@ -16,7 +16,7 @@ model User {
   userCourses        UserCourse[]
   gradeReviews       GradeReview[]
   gradeReviewResults GradeReviewResult[]
-  studentCards       StudentCard[]
+  studentCard        StudentCard?
 }
 
 model Course {
@@ -49,33 +49,30 @@ model Invitation {
 }
 
 model StudentCard {
-  id               String       @id @default(uuid())
-  studentId        String       @map("student_id")
+  id               String @id @default(uuid())
+  studentId        String @map("student_id")
   name             String
   birthday         String
-  cardExpiration   String       @map("card_expiration")
+  cardExpiration   String @map("card_expiration")
   degree           String
   department       String
-  studentCardImage String       @map("student_card_image")
-  universityName   String       @map("univeristy_name")
-  userId           String       @map("user_id")
-  user             User         @relation(fields: [userId], references: [id])
-  userCourses      UserCourse[]
+  studentCardImage String @map("student_card_image")
+  universityName   String @map("univeristy_name")
+  userId           String @unique @map("user_id")
+  user             User   @relation(fields: [userId], references: [id])
 
   @@map("student_card")
 }
 
 model UserCourse {
-  userId        String         @map("user_id")
-  courseId      String         @map("course_id")
-  role          UserCourseRole
-  invitationId  String?        @unique @map("invitation_id")
-  joinedAt      DateTime       @default(now()) @map("joined_at")
-  course        Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  invitation    Invitation?    @relation(fields: [invitationId], references: [id], onDelete: Cascade)
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  studentCardId String?        @map("student_card_id")
-  studentCard   StudentCard?   @relation(fields: [studentCardId], references: [id])
+  userId       String         @map("user_id")
+  courseId     String         @map("course_id")
+  role         UserCourseRole
+  invitationId String?        @unique @map("invitation_id")
+  joinedAt     DateTime       @default(now()) @map("joined_at")
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  invitation   Invitation?    @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, courseId])
   @@map("user_course")

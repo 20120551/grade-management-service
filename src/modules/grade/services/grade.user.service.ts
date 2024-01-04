@@ -107,15 +107,19 @@ export class GradeStudentService implements IGradeStudentService {
         },
       },
       include: {
-        studentCard: {
+        user: {
           select: {
-            studentId: true,
+            studentCard: {
+              select: {
+                studentId: true,
+              },
+            },
           },
         },
       },
     });
 
-    if (!userCourse || !userCourse.studentCard.studentId) {
+    if (!userCourse || !userCourse.user.studentCard?.studentId) {
       throw new BadRequestException(
         'cannot have permission to saw that resource',
       );
@@ -124,7 +128,7 @@ export class GradeStudentService implements IGradeStudentService {
     const userCourseGrade = await this._prismaService.userCourseGrade.findFirst(
       {
         where: {
-          studentId: userCourse.studentCard.studentId,
+          studentId: userCourse.user.studentCard.studentId,
           gradeTypeId,
         },
         select: {
