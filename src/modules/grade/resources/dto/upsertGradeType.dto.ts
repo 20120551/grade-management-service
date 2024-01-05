@@ -13,7 +13,10 @@ export class CreateGradeTypeDto {
   desc: string;
   @defaultValue(GradeStatus.CREATED)
   status: GradeStatus;
+  @defaultValue(() => new Date().toISOString())
+  updatedAt: string;
 }
+
 export class CreateSubGradeTypeDto {
   @IsNumber()
   percentage: number;

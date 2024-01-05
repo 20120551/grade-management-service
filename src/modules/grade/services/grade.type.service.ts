@@ -112,16 +112,19 @@ export class GradeTypeService implements IGradeTypeService {
     });
 
     const gradeTypeMap = new Map(
-      gradeTypes.map((data) => [data.label, { ...data }]),
+      createGradeTypes.map((data) => [data.label, { ...data }]),
     );
 
     const createBatch = differenceBy(createGradeTypes, gradeTypes, 'label');
 
-    const updateBatch = createGradeTypes
+    const updateBatch = gradeTypes
       .map((gradeType) => {
         if (gradeTypeMap.has(gradeType.label)) {
+          const { updatedAt, ...data } = gradeTypeMap.get(gradeType.label);
           return {
-            ...gradeTypeMap.get(gradeType.label),
+            id: gradeType.id,
+            ...data,
+            updated_at: updatedAt,
           };
         }
 
@@ -131,7 +134,10 @@ export class GradeTypeService implements IGradeTypeService {
 
     const result = await this._prisma.$transaction(async (context) => {
       const result = await context.gradeType.createMany({
-        data: createBatch.map((data) => ({ ...data, gradeStructureId })),
+        data: createBatch.map(({ updatedAt, ...data }) => ({
+          ...data,
+          gradeStructureId,
+        })),
       });
 
       await BPromise.mapSeries(updateBatch, (data) =>

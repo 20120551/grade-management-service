@@ -97,6 +97,8 @@ model GradeType {
   desc             String
   type             SupportedGradeType?
   status           GradeStatus
+  created_at       DateTime            @default(now())
+  updated_at       DateTime            @default(now())
   parentId         String?             @map("parent_id")
   parent           GradeType?          @relation(name: "grade_sub_type", fields: [parentId], references: [id])
   gradeStructure   GradeStructure      @relation(fields: [gradeStructureId], references: [id], onDelete: Cascade)
