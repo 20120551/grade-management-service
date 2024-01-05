@@ -1,4 +1,4 @@
-import { GradeStructure, SupportedGradeType } from '@prisma/client';
+import { $Enums, GradeStructure, SupportedGradeType } from '@prisma/client';
 import { Stream } from 'stream';
 import ExcelJS from 'exceljs';
 import BPromise from 'bluebird';
@@ -8,6 +8,7 @@ import fs from 'fs';
 import { flatMap, flatten, groupBy, isEmpty } from 'lodash';
 import {
   CreateGradeStructureDto,
+  FinalizeGradeStructureDto,
   GradeStructureFilterByCourseIdDto,
   GradeStructureFilterDto,
   UpdateGradeStructureDto,
@@ -31,6 +32,10 @@ export interface IGradeStructureService {
     gradeStructureId: string,
     updateGradeStructureDto: UpdateGradeStructureDto,
   ): Promise<GradeStructure>;
+  finalizeGradeStructure(
+    gradeStructureId: string,
+    finalizeGradeStructureDto: FinalizeGradeStructureDto,
+  ): Promise<GradeStructure>;
   deleteGradeStructure(gradeStructureId: string): Promise<void>;
   downloadGradeBoard(gradeStructureId: string): Promise<GradeBoardResponse>;
 }
@@ -38,6 +43,18 @@ export interface IGradeStructureService {
 @Injectable()
 export class GradeStructureService implements IGradeStructureService {
   constructor(private readonly _prismaService: PrismaService) {}
+  async finalizeGradeStructure(
+    gradeStructureId: string,
+    finalizeGradeStructureDto: FinalizeGradeStructureDto,
+  ): Promise<GradeStructure> {
+    const gradeStructure = await this._updateGradeStructure(
+      gradeStructureId,
+      finalizeGradeStructureDto,
+    );
+
+    // TODO: add firebase event
+    return gradeStructure;
+  }
 
   async downloadGradeBoard(
     gradeStructureId: string,
@@ -194,20 +211,9 @@ export class GradeStructureService implements IGradeStructureService {
       row.getCell('Finalize').value = finalize;
     });
 
-    // finalizes.map(
-    //   (finalize, index) =>
-    //     (worksheet
-    //       .getRow(startRowContent + index + 1)
-    //       .getCell(headerColumn - 1).value = finalize),
-    // );
-
     worksheet.commit();
     workbook.commit();
 
-    await fs.promises.writeFile(
-      'D:\\SOURCE CODE\\Project\\graduation\\Backend\\webnc\\test.xlsx',
-      stream,
-    );
     return {
       buffer: stream,
       fileName: 'grade-board.xlsx',
@@ -323,6 +329,26 @@ export class GradeStructureService implements IGradeStructureService {
     gradeStructureId: string,
     updateGradeStructureDto: UpdateGradeStructureDto,
   ): Promise<GradeStructure> {
+    return this._updateGradeStructure(
+      gradeStructureId,
+      updateGradeStructureDto,
+    );
+  }
+
+  async deleteGradeStructure(gradeStructureId: string): Promise<void> {
+    await this._prismaService.gradeStructure.delete({
+      where: {
+        id: gradeStructureId,
+      },
+    });
+  }
+
+  private async _updateGradeStructure(
+    gradeStructureId: string,
+    updateGradeStructureDto:
+      | UpdateGradeStructureDto
+      | FinalizeGradeStructureDto,
+  ): Promise<GradeStructure> {
     const result = await this._prismaService.gradeStructure.update({
       where: {
         id: gradeStructureId,
@@ -333,13 +359,5 @@ export class GradeStructureService implements IGradeStructureService {
     });
 
     return result;
-  }
-
-  async deleteGradeStructure(gradeStructureId: string): Promise<void> {
-    await this._prismaService.gradeStructure.delete({
-      where: {
-        id: gradeStructureId,
-      },
-    });
   }
 }

@@ -33,6 +33,10 @@ export class CreateSubGradeTypeDto {
 export class UpdateGradeTypeDto {
   percentage?: number;
   label?: string;
-  status?: GradeStatus;
   desc?: string;
+}
+
+export class FinalizeGradeTypeDto {
+  @IsString()
+  status: GradeStatus;
 }

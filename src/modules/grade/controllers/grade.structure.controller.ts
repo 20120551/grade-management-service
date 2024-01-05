@@ -18,6 +18,8 @@ import {
   CreateGradeStructureDto,
   CreateGradeTypeDto,
   CreateSubGradeTypeDto,
+  FinalizeGradeStructureDto,
+  FinalizeGradeTypeDto,
   GradeStructureFilterByCourseIdDto,
   GradeStructureFilterDto,
   GradeTypeFilterDto,
@@ -65,13 +67,25 @@ export class GradeStructureController {
 
   @HttpCode(HttpStatus.OK)
   @Put('/:id')
-  uplodateGradeStructure(
+  updateGradeStructure(
     @Param('id') id: string,
     @Body() updateGradeStructureDto: UpdateGradeStructureDto,
   ) {
     return this._gradeStructureService.updateGradeStructure(
       id,
       updateGradeStructureDto,
+    );
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put('/:id/finalize')
+  finalizeGradeStructure(
+    @Param('id') id: string,
+    @Body() finalizeGradeStructure: FinalizeGradeStructureDto,
+  ) {
+    return this._gradeStructureService.finalizeGradeStructure(
+      id,
+      finalizeGradeStructure,
     );
   }
 
@@ -104,6 +118,15 @@ export class GradeStructureController {
     createGradeTypeDto: CreateGradeTypeDto[],
   ) {
     return this._gradeTypeService.batchGradeType(id, createGradeTypeDto);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put('/:id/type/finalize')
+  finalizeGradeType(
+    @Param('id') id: string,
+    @Body() finalizeGradeTypeDto: FinalizeGradeTypeDto,
+  ) {
+    return this._gradeTypeService.finalizeGradeType(id, finalizeGradeTypeDto);
   }
 
   @HttpCode(HttpStatus.OK)

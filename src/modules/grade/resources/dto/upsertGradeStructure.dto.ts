@@ -19,6 +19,11 @@ export class CreateGradeStructureDto {
 }
 
 export class UpdateGradeStructureDto {
-  name?: string;
-  status?: GradeStatus;
+  @IsString()
+  name: string;
+}
+
+export class FinalizeGradeStructureDto {
+  @IsString()
+  status: GradeStatus;
 }

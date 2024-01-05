@@ -1,9 +1,15 @@
-import { GradeType, PrismaClient, SupportedGradeType } from '@prisma/client';
+import {
+  $Enums,
+  GradeType,
+  PrismaClient,
+  SupportedGradeType,
+} from '@prisma/client';
 import { PrismaService } from 'utils/prisma';
 import { BatchResponse } from '../resources/response';
 import {
   CreateGradeTypeDto,
   CreateSubGradeTypeDto,
+  FinalizeGradeTypeDto,
   GradeTypeFilterDto,
   UpdateGradeTypeDto,
 } from '../resources/dto';
@@ -30,6 +36,10 @@ export interface IGradeTypeService {
     gradeTypeId: string,
     updateGradeTypeDto: UpdateGradeTypeDto,
   ): Promise<GradeType>;
+  finalizeGradeType(
+    gradeTypeId: string,
+    finalizeGradeTypeDto: FinalizeGradeTypeDto,
+  ): Promise<GradeType>;
   deleteGradeType(gradeTypeId: string): Promise<void>;
   addSubGradeType(
     gradeTypeId: string,
@@ -47,6 +57,19 @@ export class GradeTypeService implements IGradeTypeService {
     private readonly _prisma: PrismaClient,
     private readonly _prismaService: PrismaService,
   ) {}
+
+  async finalizeGradeType(
+    gradeTypeId: string,
+    finalizeGradeTypeDto: FinalizeGradeTypeDto,
+  ): Promise<GradeType> {
+    const gradeType = await this._updateGradeType(
+      gradeTypeId,
+      finalizeGradeTypeDto,
+    );
+
+    // TODO: add firestore
+    return gradeType;
+  }
 
   async getGradeType(
     gradeTypeId: string,
@@ -285,6 +308,22 @@ export class GradeTypeService implements IGradeTypeService {
       );
 
       return result;
+    });
+
+    return result;
+  }
+
+  private async _updateGradeType(
+    gradeTypeId: string,
+    updateGradeTypeDto: UpdateGradeTypeDto | FinalizeGradeTypeDto,
+  ): Promise<GradeType> {
+    const result = await this._prismaService.gradeType.update({
+      where: {
+        id: gradeTypeId,
+      },
+      data: {
+        ...updateGradeTypeDto,
+      },
     });
 
     return result;
