@@ -4,6 +4,10 @@ import {
   FirebaseStorageService,
   IFirebaseStorageService,
 } from './firebase.storage.service';
+import {
+  FirebaseFireStoreService,
+  IFirebaseFireStoreService,
+} from './firebase.firestore.service';
 
 @Module({
   providers: [
@@ -11,8 +15,12 @@ import {
       provide: IFirebaseStorageService,
       useClass: FirebaseStorageService,
     },
+    {
+      provide: IFirebaseFireStoreService,
+      useClass: FirebaseFireStoreService,
+    },
   ],
-  exports: [IFirebaseStorageService],
+  exports: [IFirebaseStorageService, IFirebaseFireStoreService],
 })
 export class FirebaseModule {
   static forRoot(options: FirebaseModuleOptions): DynamicModule {

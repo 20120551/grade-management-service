@@ -11,7 +11,7 @@ datasource db {
 model User {
   id                 String              @id
   name               String
-  email              String?
+  email              String              @unique
   picture            String
   userCourses        UserCourse[]
   gradeReviews       GradeReview[]

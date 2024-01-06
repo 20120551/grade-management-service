@@ -13,15 +13,16 @@ import {
   Put,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { IGradeStudentService } from '../services';
 import { FilterDto, UpsertGradeStudentDto } from '../resources/dto';
 import { User } from 'utils/decorator/parameters';
-import { UserResponse } from 'guards';
+import { AuthenticatedGuard, UserResponse } from 'guards';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-// @UseGuards(AuthenticatedGuard)
+@UseGuards(AuthenticatedGuard)
 @Controller('/api/grade/type/:id/student')
 export class GradeStudentController {
   constructor(

@@ -13,8 +13,10 @@ import {
   GradeStructureFilterDto,
   UpdateGradeStructureDto,
 } from '../resources/dto';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { GradeBoardHeader, GradeBoardResponse } from '../resources/response';
+import { IFirebaseFireStoreService } from 'utils/firebase';
+import { GradeStructureFinalizedEvent } from '../resources/events';
 
 export const IGradeStructureService = 'IGradeStructureService';
 export interface IGradeStructureService {
@@ -33,6 +35,7 @@ export interface IGradeStructureService {
     updateGradeStructureDto: UpdateGradeStructureDto,
   ): Promise<GradeStructure>;
   finalizeGradeStructure(
+    userId: string,
     gradeStructureId: string,
     finalizeGradeStructureDto: FinalizeGradeStructureDto,
   ): Promise<GradeStructure>;
@@ -42,8 +45,13 @@ export interface IGradeStructureService {
 
 @Injectable()
 export class GradeStructureService implements IGradeStructureService {
-  constructor(private readonly _prismaService: PrismaService) {}
+  constructor(
+    private readonly _prismaService: PrismaService,
+    @Inject(IFirebaseFireStoreService)
+    private readonly _fireStore: IFirebaseFireStoreService,
+  ) {}
   async finalizeGradeStructure(
+    userId: string,
     gradeStructureId: string,
     finalizeGradeStructureDto: FinalizeGradeStructureDto,
   ): Promise<GradeStructure> {
@@ -53,6 +61,15 @@ export class GradeStructureService implements IGradeStructureService {
     );
 
     // TODO: add firebase event
+    const event = new GradeStructureFinalizedEvent(
+      userId,
+      'content',
+      gradeStructureId,
+      'type',
+      '/redirect/endpoint',
+    );
+    const eventCreated = await this._fireStore.create('grade_structure', event);
+    console.log('Publishing the event: ', eventCreated);
     return gradeStructure;
   }
 
@@ -312,7 +329,12 @@ export class GradeStructureService implements IGradeStructureService {
           status: createGradeStructure.status,
           gradeTypes: {
             createMany: {
-              data: createGradeStructure.gradeTypes,
+              data: createGradeStructure.gradeTypes.map(
+                ({ updatedAt, ...payload }) => ({
+                  ...payload,
+                  updated_at: updatedAt,
+                }),
+              ),
             },
           },
         },

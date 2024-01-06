@@ -26,9 +26,10 @@ import {
   UpdateGradeStructureDto,
   UpdateGradeTypeDto,
 } from '../resources/dto';
-import { AuthenticatedGuard } from 'guards';
+import { AuthenticatedGuard, UserResponse } from 'guards';
+import { User } from 'utils/decorator/parameters';
 
-// @UseGuards(AuthenticatedGuard)
+@UseGuards(AuthenticatedGuard)
 @Controller('/api/grade')
 export class GradeStructureController {
   constructor(
@@ -77,13 +78,15 @@ export class GradeStructureController {
     );
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @Put('/:id/finalize')
   finalizeGradeStructure(
     @Param('id') id: string,
+    @User() user: UserResponse,
     @Body() finalizeGradeStructure: FinalizeGradeStructureDto,
   ) {
     return this._gradeStructureService.finalizeGradeStructure(
+      user.userId,
       id,
       finalizeGradeStructure,
     );
@@ -120,15 +123,6 @@ export class GradeStructureController {
     return this._gradeTypeService.batchGradeType(id, createGradeTypeDto);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Put('/:id/type/finalize')
-  finalizeGradeType(
-    @Param('id') id: string,
-    @Body() finalizeGradeTypeDto: FinalizeGradeTypeDto,
-  ) {
-    return this._gradeTypeService.finalizeGradeType(id, finalizeGradeTypeDto);
-  }
-
   @HttpCode(HttpStatus.OK)
   @Get('/type/:id')
   getGradeTypeDetail(
@@ -145,6 +139,20 @@ export class GradeStructureController {
     @Body() updateGradeTypeDto: UpdateGradeTypeDto,
   ) {
     return this._gradeTypeService.updateGradeType(id, updateGradeTypeDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Put('/type/:id/finalize')
+  finalizeGradeType(
+    @Param('id') id: string,
+    @User() user: UserResponse,
+    @Body() finalizeGradeTypeDto: FinalizeGradeTypeDto,
+  ) {
+    return this._gradeTypeService.finalizeGradeType(
+      user.userId,
+      id,
+      finalizeGradeTypeDto,
+    );
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

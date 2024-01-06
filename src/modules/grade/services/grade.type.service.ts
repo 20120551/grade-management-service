@@ -1,9 +1,4 @@
-import {
-  $Enums,
-  GradeType,
-  PrismaClient,
-  SupportedGradeType,
-} from '@prisma/client';
+import { GradeType, PrismaClient } from '@prisma/client';
 import { PrismaService } from 'utils/prisma';
 import { BatchResponse } from '../resources/response';
 import {
@@ -14,9 +9,11 @@ import {
   UpdateGradeTypeDto,
 } from '../resources/dto';
 import { BadRequestException } from 'utils/errors/domain.error';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { differenceBy, isEmpty } from 'lodash';
 import BPromise from 'bluebird';
+import { GradeTypeFinalizedEvent } from '../resources/events';
+import { IFirebaseFireStoreService } from 'utils/firebase';
 
 export const IGradeTypeService = 'IGradeTypeService';
 export interface IGradeTypeService {
@@ -37,6 +34,7 @@ export interface IGradeTypeService {
     updateGradeTypeDto: UpdateGradeTypeDto,
   ): Promise<GradeType>;
   finalizeGradeType(
+    userId: string,
     gradeTypeId: string,
     finalizeGradeTypeDto: FinalizeGradeTypeDto,
   ): Promise<GradeType>;
@@ -56,9 +54,12 @@ export class GradeTypeService implements IGradeTypeService {
   constructor(
     private readonly _prisma: PrismaClient,
     private readonly _prismaService: PrismaService,
+    @Inject(IFirebaseFireStoreService)
+    private readonly _fireStore: IFirebaseFireStoreService,
   ) {}
 
   async finalizeGradeType(
+    userId: string,
     gradeTypeId: string,
     finalizeGradeTypeDto: FinalizeGradeTypeDto,
   ): Promise<GradeType> {
@@ -68,6 +69,15 @@ export class GradeTypeService implements IGradeTypeService {
     );
 
     // TODO: add firestore
+    const event = new GradeTypeFinalizedEvent(
+      userId,
+      'content',
+      gradeTypeId,
+      'type',
+      '/redirect/endpoint',
+    );
+    const eventCreated = await this._fireStore.create('grade_type', event);
+    console.log('Publishing the event: ', eventCreated);
     return gradeType;
   }
 
