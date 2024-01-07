@@ -68,6 +68,19 @@ export class GradeTypeService implements IGradeTypeService {
         id: gradeTypeId,
       },
       select: {
+        gradeStructure: {
+          select: {
+            course: {
+              select: {
+                userCourses: {
+                  select: {
+                    userId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         status: true,
         gradeSubTypes: {
           select: {
@@ -87,9 +100,16 @@ export class GradeTypeService implements IGradeTypeService {
       gradeTypeId,
       finalizeGradeTypeDto,
     );
+
+    // get reciever ids
+    const receiverIds = gradeType.gradeStructure.course.userCourses
+      .map((receiver) => receiver.userId)
+      .filter((receiverId) => receiverId !== userId);
+
     // TODO: add firestore
     const event = new GradeTypeFinalizedEvent(
       userId,
+      receiverIds,
       'content',
       gradeTypeId,
       'type',

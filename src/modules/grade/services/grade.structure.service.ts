@@ -65,6 +65,15 @@ export class GradeStructureService implements IGradeStructureService {
         id: gradeStructureId,
       },
       select: {
+        course: {
+          select: {
+            userCourses: {
+              select: {
+                userId: true,
+              },
+            },
+          },
+        },
         gradeTypes: {
           select: {
             status: true,
@@ -87,9 +96,15 @@ export class GradeStructureService implements IGradeStructureService {
       finalizeGradeStructureDto,
     );
 
+    // get reciever ids
+    const receiverIds = gradeStructure.course.userCourses
+      .map((receiver) => receiver.userId)
+      .filter((receiverId) => receiverId !== userId);
+
     // TODO: add firebase event
     const event = new GradeStructureFinalizedEvent(
       userId,
+      receiverIds,
       'content',
       gradeStructureId,
       'type',
