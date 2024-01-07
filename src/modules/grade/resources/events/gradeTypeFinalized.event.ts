@@ -1,6 +1,6 @@
 export class GradeTypeFinalizedEvent {
   senderId: string;
-  receiverIds: string[];
+  recipientIds: string[];
   content: string;
   channel: string;
   type: string;
@@ -9,14 +9,14 @@ export class GradeTypeFinalizedEvent {
 
   constructor(
     senderId: string,
-    receiverIds: string[],
+    recipientIds: string[],
     content: string,
     gradeTypeId: string,
     type: string,
     redirectEndpoint: string,
   ) {
     this.senderId = senderId;
-    this.receiverIds = receiverIds;
+    this.recipientIds = recipientIds;
     this.content = content;
     this.channel = `${this.name}-${gradeTypeId}`;
     this.type = type;
