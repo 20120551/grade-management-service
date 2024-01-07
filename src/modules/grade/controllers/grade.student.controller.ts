@@ -19,8 +19,9 @@ import {
 import { IGradeStudentService } from '../services';
 import { FilterDto, UpsertGradeStudentDto } from '../resources/dto';
 import { User } from 'utils/decorator/parameters';
-import { AuthenticatedGuard, UserResponse } from 'guards';
+import { AuthenticatedGuard, UseCoursePolicies, UserResponse } from 'guards';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserCourseRole } from '@prisma/client';
 
 @UseGuards(AuthenticatedGuard)
 @Controller('/api/grade/type/:id/student')
@@ -30,6 +31,8 @@ export class GradeStudentController {
     private readonly _gradeStudentService: IGradeStudentService,
   ) {}
 
+  // get grade of grade type
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Get('/grade')
   getGradeTypeGrade(
@@ -39,20 +42,20 @@ export class GradeStudentController {
     return this._gradeStudentService.getGradeTypeGrade(gradeTypeId, filterDto);
   }
 
+  // get grade of grade type in course
   @HttpCode(HttpStatus.OK)
   @Get()
-  getStudentGrade(
-    @Query() { courseId }: { courseId: string },
+  getStudentGradeInGradeType(
     @Param('id') gradeTypeId: string,
     @User() user: UserResponse,
   ) {
-    return this._gradeStudentService.getCourseGrade(
+    return this._gradeStudentService.getStudentGradeInGradeType(
       user.userId,
-      courseId,
       gradeTypeId,
     );
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.CREATED)
   @Post()
   addStudentGrade(
@@ -65,6 +68,7 @@ export class GradeStudentController {
     );
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Put()
   updateStudentGrade(
@@ -77,6 +81,7 @@ export class GradeStudentController {
     );
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
   deleteStudentGrade(
@@ -86,10 +91,11 @@ export class GradeStudentController {
     return this._gradeStudentService.deleteCourseGrade(gradeTypeId, studentId);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Put('/template/import')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadStudentCard(
+  async batchCourseGrade(
     @UploadedFile(
       new ParseFilePipe({
         // max 10mb
@@ -113,9 +119,10 @@ export class GradeStudentController {
     return userResponse;
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Get('/template/import')
-  async updateStudentCard(
+  async downloadGradeTemplate(
     // @User() user: UserResponse,
     @Param('id') gradeTypeId: string,
   ) {

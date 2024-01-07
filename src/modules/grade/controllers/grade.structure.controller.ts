@@ -26,8 +26,9 @@ import {
   UpdateGradeStructureDto,
   UpdateGradeTypeDto,
 } from '../resources/dto';
-import { AuthenticatedGuard, UserResponse } from 'guards';
+import { AuthenticatedGuard, UseCoursePolicies, UserResponse } from 'guards';
 import { User } from 'utils/decorator/parameters';
+import { UserCourseRole } from '@prisma/client';
 
 @UseGuards(AuthenticatedGuard)
 @Controller('/api/grade')
@@ -56,6 +57,7 @@ export class GradeStructureController {
     return this._gradeStructureService.getGradeStructureDetail(id, filter);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.CREATED)
   @Post()
   createGradeStructure(
@@ -66,6 +68,7 @@ export class GradeStructureController {
     );
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Put('/:id')
   updateGradeStructure(
@@ -78,6 +81,7 @@ export class GradeStructureController {
     );
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Put('/:id/finalize')
   finalizeGradeStructure(
@@ -92,18 +96,21 @@ export class GradeStructureController {
     );
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/:id')
   deleteGradeStructure(@Param('id') id: string) {
     return this._gradeStructureService.deleteGradeStructure(id);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Get(':id/board')
   downloadGradeBoard(@Param('id') id: string) {
     return this._gradeStructureService.downloadGradeBoard(id);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.CREATED)
   @Post('/:id/type')
   addGradeType(
@@ -113,6 +120,7 @@ export class GradeStructureController {
     return this._gradeTypeService.createGradeType(id, createGradeTypeDto);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.CREATED)
   @Put('/:id/type/batch')
   batchGradeTypes(
@@ -132,6 +140,7 @@ export class GradeStructureController {
     return this._gradeTypeService.getGradeType(id, filter);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Put('/type/:id')
   updateGradeType(
@@ -141,6 +150,7 @@ export class GradeStructureController {
     return this._gradeTypeService.updateGradeType(id, updateGradeTypeDto);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.OK)
   @Put('/type/:id/finalize')
   finalizeGradeType(
@@ -155,12 +165,14 @@ export class GradeStructureController {
     );
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/type/:id')
   deleteGradeType(@Param('id') id: string) {
     return this._gradeTypeService.deleteGradeType(id);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.CREATED)
   @Post('/type/:id/sub')
   addGradeSubType(
@@ -170,6 +182,7 @@ export class GradeStructureController {
     return this._gradeTypeService.addSubGradeType(id, createGradeTypeDto);
   }
 
+  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
   @HttpCode(HttpStatus.CREATED)
   @Put('/type/:id/sub/batch')
   batchGradeSubTypes(

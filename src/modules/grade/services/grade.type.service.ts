@@ -1,4 +1,4 @@
-import { GradeType, PrismaClient } from '@prisma/client';
+import { $Enums, GradeStatus, GradeType, PrismaClient } from '@prisma/client';
 import { PrismaService } from 'utils/prisma';
 import { BatchResponse } from '../resources/response';
 import {
@@ -63,11 +63,30 @@ export class GradeTypeService implements IGradeTypeService {
     gradeTypeId: string,
     finalizeGradeTypeDto: FinalizeGradeTypeDto,
   ): Promise<GradeType> {
-    const gradeType = await this._updateGradeType(
+    const gradeType = await this._prismaService.gradeType.findUnique({
+      where: {
+        id: gradeTypeId,
+      },
+      select: {
+        status: true,
+        gradeSubTypes: {
+          select: {
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!this._canMarkAsFinalize([gradeType])) {
+      throw new BadRequestException(
+        'Some grade sub type does not completed yet',
+      );
+    }
+
+    const _gradeType = await this._updateGradeType(
       gradeTypeId,
       finalizeGradeTypeDto,
     );
-
     // TODO: add firestore
     const event = new GradeTypeFinalizedEvent(
       userId,
@@ -78,7 +97,7 @@ export class GradeTypeService implements IGradeTypeService {
     );
     const eventCreated = await this._fireStore.create('grade_type', event);
     console.log('Publishing the event: ', eventCreated);
-    return gradeType;
+    return _gradeType;
   }
 
   async getGradeType(
@@ -337,5 +356,32 @@ export class GradeTypeService implements IGradeTypeService {
     });
 
     return result;
+  }
+
+  private _canMarkAsFinalize(
+    gradeTypes: {
+      status: $Enums.GradeStatus;
+      gradeSubTypes: {
+        status: $Enums.GradeStatus;
+      }[];
+    }[],
+  ): boolean {
+    if (isEmpty(gradeTypes)) {
+      return true;
+    }
+
+    const canMarkAsFinalizeFilter = ({ status, gradeSubTypes }) => {
+      if (status === GradeStatus.CREATED) {
+        return false;
+      }
+
+      if (isEmpty(gradeSubTypes)) {
+        return true;
+      }
+
+      return gradeSubTypes.some(canMarkAsFinalizeFilter);
+    };
+    const canMarkAsFinalize = gradeTypes.some(canMarkAsFinalizeFilter);
+    return canMarkAsFinalize;
   }
 }

@@ -1,11 +1,16 @@
-import { $Enums, GradeStructure, SupportedGradeType } from '@prisma/client';
+import {
+  $Enums,
+  GradeStatus,
+  GradeStructure,
+  GradeType,
+  SupportedGradeType,
+} from '@prisma/client';
 import { Stream } from 'stream';
 import ExcelJS from 'exceljs';
 import BPromise from 'bluebird';
 import { PrismaService } from 'utils/prisma';
 import { BadRequestException } from 'utils/errors/domain.error';
-import fs from 'fs';
-import { flatMap, flatten, groupBy, isEmpty } from 'lodash';
+import { flatten, groupBy, isEmpty } from 'lodash';
 import {
   CreateGradeStructureDto,
   FinalizeGradeStructureDto,
@@ -55,7 +60,29 @@ export class GradeStructureService implements IGradeStructureService {
     gradeStructureId: string,
     finalizeGradeStructureDto: FinalizeGradeStructureDto,
   ): Promise<GradeStructure> {
-    const gradeStructure = await this._updateGradeStructure(
+    const gradeStructure = await this._prismaService.gradeStructure.findUnique({
+      where: {
+        id: gradeStructureId,
+      },
+      select: {
+        gradeTypes: {
+          select: {
+            status: true,
+            gradeSubTypes: {
+              select: {
+                status: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!this._canMarkAsFinalize(gradeStructure.gradeTypes)) {
+      throw new BadRequestException('Some grade type does complete yet');
+    }
+
+    const _gradeStructure = await this._updateGradeStructure(
       gradeStructureId,
       finalizeGradeStructureDto,
     );
@@ -70,7 +97,7 @@ export class GradeStructureService implements IGradeStructureService {
     );
     const eventCreated = await this._fireStore.create('grade_structure', event);
     console.log('Publishing the event: ', eventCreated);
-    return gradeStructure;
+    return _gradeStructure;
   }
 
   async downloadGradeBoard(
@@ -381,5 +408,28 @@ export class GradeStructureService implements IGradeStructureService {
     });
 
     return result;
+  }
+
+  private _canMarkAsFinalize(
+    gradeTypes: {
+      status: $Enums.GradeStatus;
+      gradeSubTypes: {
+        status: $Enums.GradeStatus;
+      }[];
+    }[],
+  ): boolean {
+    if (isEmpty(gradeTypes)) {
+      return true;
+    }
+
+    const canMarkAsFinalizeFilter = ({ status, gradeSubTypes }) => {
+      if (status === GradeStatus.CREATED) {
+        return false;
+      }
+
+      return gradeSubTypes.some(canMarkAsFinalizeFilter);
+    };
+    const canMarkAsFinalize = gradeTypes.some(canMarkAsFinalizeFilter);
+    return canMarkAsFinalize;
   }
 }

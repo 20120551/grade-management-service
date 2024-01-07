@@ -21,7 +21,7 @@ import {
   UserCourseGrade,
 } from '@prisma/client';
 import fs from 'fs';
-import { differenceBy } from 'lodash';
+import { differenceBy, isEmpty } from 'lodash';
 
 export const IGradeStudentService = 'IGradeStudentService';
 export interface IGradeStudentService {
@@ -29,9 +29,8 @@ export interface IGradeStudentService {
     gradeTypeId: string,
     filterDto: FilterDto,
   ): Promise<StudentGradeResponse[]>;
-  getCourseGrade(
+  getStudentGradeInGradeType(
     userId: string,
-    courseId: string,
     gradeTypeId: string,
   ): Promise<StudentGradeResponse>;
   addCourseGrade(
@@ -78,9 +77,8 @@ export class GradeStudentService implements IGradeStudentService {
     return userCourseGrade;
   }
 
-  async getCourseGrade(
+  async getStudentGradeInGradeType(
     userId: string,
-    courseId: string,
     gradeTypeId: string,
   ): Promise<StudentGradeResponse> {
     const gradeType = await this._prismaService.gradeType.findUnique({
@@ -89,6 +87,13 @@ export class GradeStudentService implements IGradeStudentService {
       },
       select: {
         status: true,
+        gradeSubTypes: {
+          select: {
+            id: true,
+            percentage: true,
+            label: true,
+          },
+        },
       },
     });
 
@@ -99,46 +104,67 @@ export class GradeStudentService implements IGradeStudentService {
     }
 
     // case: 1
-    const userCourse = await this._prismaService.userCourse.findUnique({
+    const user = await this._prismaService.user.findUnique({
       where: {
-        userId_courseId: {
-          userId,
-          courseId,
-        },
+        id: userId,
       },
       include: {
-        user: {
+        studentCard: {
           select: {
-            studentCard: {
-              select: {
-                studentId: true,
-              },
-            },
+            studentId: true,
           },
         },
       },
     });
 
-    if (!userCourse || !userCourse.user.studentCard?.studentId) {
+    if (!user || !user.studentCard?.studentId) {
       throw new BadRequestException(
-        'cannot have permission to saw that resource',
+        'cannot have permission to see that resource',
       );
     }
 
-    const userCourseGrade = await this._prismaService.userCourseGrade.findFirst(
-      {
-        where: {
-          studentId: userCourse.user.studentCard.studentId,
-          gradeTypeId,
-        },
-        select: {
-          point: true,
-        },
+    let userCourseGrade = null;
+    userCourseGrade = await this._prismaService.userCourseGrade.findFirst({
+      where: {
+        studentId: user.studentCard.studentId,
+        gradeTypeId,
       },
-    );
+      select: {
+        point: true,
+      },
+    });
 
     if (!userCourseGrade) {
       throw new BadRequestException('not found grade with student id');
+    }
+
+    if (isEmpty(gradeType.gradeSubTypes)) {
+      const points = await BPromise.map(
+        gradeType.gradeSubTypes,
+        async (gradeType) => {
+          const data = await this._prismaService.userCourseGrade.findFirst({
+            where: {
+              studentId: user.studentCard.studentId,
+              gradeTypeId: gradeType.id,
+            },
+            select: {
+              point: true,
+            },
+          });
+
+          return {
+            point: data.point,
+            ...gradeType,
+          };
+        },
+      );
+
+      userCourseGrade.point = points.reduce(
+        (val, point) => point.point + val,
+        0,
+      );
+
+      userCourseGrade['subGradeTypes'] = points;
     }
 
     return userCourseGrade;
