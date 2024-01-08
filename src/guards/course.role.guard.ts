@@ -10,6 +10,7 @@ import { UserCourseRole } from '@prisma/client';
 import { COURSE_ROLES_KEY } from 'configurations/role.config';
 import { Request } from 'express';
 import { CourseRoles, UseCourseRoleOptions } from 'guards';
+import { UnauthorizedException } from 'utils/errors/domain.error';
 import { PrismaService } from 'utils/prisma';
 
 @Injectable()
@@ -28,6 +29,10 @@ export class CourseRoleGuard implements CanActivate {
       req.params?.courseId ||
       req.query?.id ||
       req.query?.courseId;
+
+    if (!courseId) {
+      throw new UnauthorizedException("you don't have permission");
+    }
 
     const { userId } = req.user;
     const { role } = await this._prismaService.userCourse.findFirst({

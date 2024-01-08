@@ -15,7 +15,6 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   AuthenticatedGuard,
   CourseRoleGuard,
-  UseCoursePolicies,
   UseGradeReviewPolicies,
   UseGradeReviewResultPolicies,
   UserResponse,

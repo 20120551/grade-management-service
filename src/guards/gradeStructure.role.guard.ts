@@ -30,6 +30,10 @@ export class GradeStructureRoleGuard implements CanActivate {
       req.query?.id ||
       req.query?.gradeStructureId;
 
+    if (!id) {
+      throw new UnauthorizedException("you don't have permission");
+    }
+
     const { userId } = req.user;
     const gradeStructure = await this._prismaService.gradeStructure.findUnique({
       where: {
