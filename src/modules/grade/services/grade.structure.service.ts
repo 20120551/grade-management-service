@@ -21,7 +21,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { GradeBoardHeader, GradeBoardResponse } from '../resources/response';
 import { IFirebaseFireStoreService } from 'utils/firebase';
-import { GradeStructureFinalizedEvent } from '../resources/events';
+import { NotificationTemplate } from '../resources/events';
 
 export const IGradeStructureService = 'IGradeStructureService';
 export interface IGradeStructureService {
@@ -102,14 +102,16 @@ export class GradeStructureService implements IGradeStructureService {
       .filter((receiverId) => receiverId !== userId);
 
     // TODO: add firebase event
-    const event = new GradeStructureFinalizedEvent(
-      userId,
-      receiverIds,
-      'content',
-      gradeStructureId,
-      'notification',
-      '/redirect/endpoint',
-    );
+    const event: NotificationTemplate = {
+      senderId: userId,
+      recipientIds: receiverIds,
+      content: `The grade composition has mark as finalized`,
+      type: 'notification',
+      redirectEndpoint: `/grade/${gradeStructureId}`,
+      status: 'processing',
+      title: 'Finalized Grade Composition',
+      isPublished: false,
+    };
     const eventCreated = await this._fireStore.create('notifications', event);
     console.log('Publishing the event: ', eventCreated);
     return _gradeStructure;

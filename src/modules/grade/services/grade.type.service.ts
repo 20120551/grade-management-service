@@ -12,8 +12,8 @@ import { BadRequestException } from 'utils/errors/domain.error';
 import { Inject, Injectable } from '@nestjs/common';
 import { differenceBy, isEmpty } from 'lodash';
 import BPromise from 'bluebird';
-import { GradeTypeFinalizedEvent } from '../resources/events';
 import { IFirebaseFireStoreService } from 'utils/firebase';
+import { NotificationTemplate } from '../resources/events';
 
 export const IGradeTypeService = 'IGradeTypeService';
 export interface IGradeTypeService {
@@ -107,14 +107,17 @@ export class GradeTypeService implements IGradeTypeService {
       .filter((receiverId) => receiverId !== userId);
 
     // TODO: add firestore
-    const event = new GradeTypeFinalizedEvent(
-      userId,
-      receiverIds,
-      'content',
-      gradeTypeId,
-      'notification',
-      '/redirect/endpoint',
-    );
+    const event: NotificationTemplate = {
+      senderId: userId,
+      recipientIds: receiverIds,
+      content: `The Exam has mark as finalized`,
+      type: 'notification',
+      redirectEndpoint: `/grade/type/${gradeTypeId}`,
+      status: 'processing',
+      title: 'Finalized Exam',
+      isPublished: false,
+    };
+
     const eventCreated = await this._fireStore.create('notifications', event);
     console.log('Publishing the event: ', eventCreated);
     return _gradeType;
