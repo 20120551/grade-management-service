@@ -14,6 +14,7 @@ import { HealthCheckModule } from 'modules/healthCheck/health.check.module';
 import { ReviewModule } from 'modules/review/review.module';
 import { RedisClientOptions } from 'redis';
 import { Auth0Module, Auth0ModuleOptions } from 'utils/auth0';
+import { FirebaseModule, FirebaseModuleOptions } from 'utils/firebase';
 import { PrismaModule } from 'utils/prisma';
 
 @Module({
@@ -37,6 +38,14 @@ import { PrismaModule } from 'utils/prisma';
         const redisOptions = configService.get<RedisClientOptions>('redis');
         const store = await redisStore(redisOptions);
         return { store: store as unknown as CacheStore };
+      },
+      inject: [ConfigService],
+    }),
+    FirebaseModule.forRootAsync({
+      global: true,
+      useFactory: (configService: ConfigService) => {
+        const firebase = configService.get<FirebaseModuleOptions>('firebase');
+        return firebase;
       },
       inject: [ConfigService],
     }),

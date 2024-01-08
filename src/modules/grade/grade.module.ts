@@ -11,8 +11,6 @@ import {
   IGradeStudentService,
   IGradeTypeService,
 } from './services';
-import { FirebaseModule, FirebaseModuleOptions } from 'utils/firebase';
-import { ConfigService } from '@nestjs/config';
 
 @Module({
   controllers: [GradeStructureController, GradeStudentController],
@@ -29,15 +27,6 @@ import { ConfigService } from '@nestjs/config';
       provide: IGradeStudentService,
       useClass: GradeStudentService,
     },
-  ],
-  imports: [
-    FirebaseModule.forRootAsync({
-      useFactory: (configService: ConfigService) => {
-        const firebase = configService.get<FirebaseModuleOptions>('firebase');
-        return firebase;
-      },
-      inject: [ConfigService],
-    }),
   ],
 })
 export class GradeModule {}
