@@ -9,9 +9,17 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { CourseRoleGuard, UseCoursePolicies, UserResponse } from 'guards';
+import {
+  AuthenticatedGuard,
+  CourseRoleGuard,
+  UseCoursePolicies,
+  UseGradeReviewPolicies,
+  UseGradeReviewResultPolicies,
+  UserResponse,
+} from 'guards';
 import { User } from 'utils/decorator/parameters';
 import {
   CreateGradeReviewDto,
@@ -33,7 +41,7 @@ import { plainToInstance } from 'class-transformer';
 import { GetGradeReviewQuery } from '../services/queries';
 import { UserCourseRole } from '@prisma/client';
 
-@UseCoursePolicies({ roles: [UserCourseRole.STUDENT] })
+@UseGuards(AuthenticatedGuard)
 @Controller('api/grade/review')
 export class ReviewController {
   constructor(
@@ -62,6 +70,9 @@ export class ReviewController {
     return this._commandBus.execute(command);
   }
 
+  @UseGradeReviewPolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Get('/:id')
   getGradeReviewDetail(@Param('id') id: string, @Query() filter: FilterDto) {
@@ -73,6 +84,9 @@ export class ReviewController {
     return this._queryBus.execute(query);
   }
 
+  @UseGradeReviewPolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Put('/:id')
   updateGradeReview(
@@ -87,6 +101,9 @@ export class ReviewController {
     return this._commandBus.execute(command);
   }
 
+  @UseGradeReviewPolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/:id')
   deleteGradeReview(@Param('id') id: string) {
@@ -97,6 +114,9 @@ export class ReviewController {
     return this._commandBus.execute(command);
   }
 
+  @UseGradeReviewResultPolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.CREATED)
   @Post('/:id/result')
   createGradeReviewResult(
@@ -113,6 +133,9 @@ export class ReviewController {
     return this._commandBus.execute(command);
   }
 
+  @UseGradeReviewResultPolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Put('/:id/result/re-assign')
   reassignGradeReviewResult(
@@ -129,6 +152,9 @@ export class ReviewController {
     return this._commandBus.execute(command);
   }
 
+  @UseGradeReviewResultPolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Put('/:id/result/close')
   closeGradeReviewResult(

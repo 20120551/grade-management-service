@@ -107,10 +107,10 @@ export class GradeStructureService implements IGradeStructureService {
       receiverIds,
       'content',
       gradeStructureId,
-      'type',
+      'notification',
       '/redirect/endpoint',
     );
-    const eventCreated = await this._fireStore.create('grade_structure', event);
+    const eventCreated = await this._fireStore.create('notifications', event);
     console.log('Publishing the event: ', eventCreated);
     return _gradeStructure;
   }
@@ -438,8 +438,8 @@ export class GradeStructureService implements IGradeStructureService {
     }
 
     const canMarkAsFinalizeFilter = ({ status, gradeSubTypes }) => {
-      if (status === GradeStatus.CREATED) {
-        return false;
+      if (status === GradeStatus.DONE) {
+        return true;
       }
 
       return gradeSubTypes.some(canMarkAsFinalizeFilter);

@@ -112,10 +112,10 @@ export class GradeTypeService implements IGradeTypeService {
       receiverIds,
       'content',
       gradeTypeId,
-      'type',
+      'notification',
       '/redirect/endpoint',
     );
-    const eventCreated = await this._fireStore.create('grade_type', event);
+    const eventCreated = await this._fireStore.create('notifications', event);
     console.log('Publishing the event: ', eventCreated);
     return _gradeType;
   }
@@ -147,7 +147,7 @@ export class GradeTypeService implements IGradeTypeService {
 
   async createGradeType(
     gradeStructureId: string,
-    createGradeType: CreateGradeTypeDto,
+    { updatedAt, ...createGradeType }: CreateGradeTypeDto,
   ): Promise<GradeType> {
     const gradeTypes = await this._prismaService.gradeType.findMany({
       where: {
@@ -391,8 +391,8 @@ export class GradeTypeService implements IGradeTypeService {
     }
 
     const canMarkAsFinalizeFilter = ({ status, gradeSubTypes }) => {
-      if (status === GradeStatus.CREATED) {
-        return false;
+      if (status === GradeStatus.DONE) {
+        return true;
       }
 
       if (isEmpty(gradeSubTypes)) {

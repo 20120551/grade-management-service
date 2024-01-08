@@ -19,7 +19,12 @@ import {
 import { IGradeStudentService } from '../services';
 import { FilterDto, UpsertGradeStudentDto } from '../resources/dto';
 import { User } from 'utils/decorator/parameters';
-import { AuthenticatedGuard, UseCoursePolicies, UserResponse } from 'guards';
+import {
+  AuthenticatedGuard,
+  UseCoursePolicies,
+  UseGradeTypePolicies,
+  UserResponse,
+} from 'guards';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserCourseRole } from '@prisma/client';
 
@@ -32,7 +37,9 @@ export class GradeStudentController {
   ) {}
 
   // get grade of grade type
-  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
+  @UseGradeTypePolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Get('/grade')
   getGradeTypeGrade(
@@ -55,7 +62,9 @@ export class GradeStudentController {
     );
   }
 
-  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
+  @UseGradeTypePolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.CREATED)
   @Post()
   addStudentGrade(
@@ -68,7 +77,9 @@ export class GradeStudentController {
     );
   }
 
-  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
+  @UseGradeTypePolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Put()
   updateStudentGrade(
@@ -81,7 +92,9 @@ export class GradeStudentController {
     );
   }
 
-  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
+  @UseGradeTypePolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
   deleteStudentGrade(
@@ -91,7 +104,9 @@ export class GradeStudentController {
     return this._gradeStudentService.deleteCourseGrade(gradeTypeId, studentId);
   }
 
-  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
+  @UseGradeTypePolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Put('/template/import')
   @UseInterceptors(FileInterceptor('file'))
@@ -119,7 +134,9 @@ export class GradeStudentController {
     return userResponse;
   }
 
-  @UseCoursePolicies({ roles: [UserCourseRole.HOST, UserCourseRole.TEACHER] })
+  @UseGradeTypePolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
   @HttpCode(HttpStatus.OK)
   @Get('/template/import')
   async downloadGradeTemplate(

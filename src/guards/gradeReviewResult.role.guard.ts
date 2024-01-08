@@ -6,14 +6,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserCourseRole } from '@prisma/client';
 import { COURSE_ROLES_KEY } from 'configurations/role.config';
 import { Request } from 'express';
 import { CourseRoles, UseCourseRoleOptions } from 'guards';
+import { UnauthorizedException } from 'utils/errors/domain.error';
 import { PrismaService } from 'utils/prisma';
 
 @Injectable()
-export class CourseRoleGuard implements CanActivate {
+export class GradeReviewResultRoleGuard implements CanActivate {
   constructor(
     private readonly _prismaService: PrismaService,
     private readonly _reflector: Reflector,
@@ -21,18 +21,44 @@ export class CourseRoleGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
-    const courseId =
+    const id =
       req.body?.id ||
-      req.body?.courseId ||
+      req.body?.gradeReviewId ||
       req.params?.id ||
-      req.params?.courseId ||
+      req.params?.gradeReviewId ||
       req.query?.id ||
-      req.query?.courseId;
+      req.query?.gradeReviewId;
 
     const { userId } = req.user;
+
+    const gradeReview = await this._prismaService.gradeReview.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        userCourseGrade: {
+          select: {
+            gradeType: {
+              select: {
+                gradeStructure: {
+                  select: {
+                    courseId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!gradeReview?.userCourseGrade?.gradeType?.gradeStructure?.courseId) {
+      throw new UnauthorizedException("You don't have permission");
+    }
+
     const { role } = await this._prismaService.userCourse.findFirst({
       where: {
-        courseId,
+        courseId: gradeReview.userCourseGrade.gradeType.gradeStructure.courseId,
         userId,
       },
     });
@@ -50,11 +76,11 @@ export class CourseRoleGuard implements CanActivate {
   }
 }
 
-export const UseCoursePolicies = (
+export const UseGradeReviewResultPolicies = (
   options: UseCourseRoleOptions,
 ): ClassDecorator & MethodDecorator => {
   return (target: Function, prop?: string, descriptor?: PropertyDescriptor) => {
     CourseRoles(options.roles)(target, prop, descriptor);
-    UseGuards(CourseRoleGuard)(target, prop, descriptor);
+    UseGuards(GradeReviewResultRoleGuard)(target, prop, descriptor);
   };
 };

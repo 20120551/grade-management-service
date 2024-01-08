@@ -7,7 +7,7 @@ import {
   QueryDocumentSnapshot,
   getFirestore,
 } from 'firebase-admin/firestore';
-import { flatten, isEmpty, isObject } from 'lodash';
+import { flatten, isEmpty, isObject, isUndefined } from 'lodash';
 import BPromise from 'bluebird';
 import { v4 as uuid } from 'uuid';
 import { credential } from 'firebase-admin';
@@ -15,6 +15,7 @@ import { credential as firebaseCredential } from './credential';
 
 export const IFirebaseFireStoreService = 'IFirebaseFireStoreService';
 
+export interface IEvent {}
 export type FireStoreOperation = {
   neq?: boolean | string | number;
   eq?: boolean | string | number;
@@ -22,6 +23,8 @@ export type FireStoreOperation = {
   lte?: string | number;
   gt?: string | number;
   gte?: string | number;
+  in?: Array<string | number>;
+  'array-contains'?: string | number;
 };
 
 export type FireStoreOperationCondition = Record<string, FireStoreOperation>;
@@ -40,6 +43,12 @@ export type FireStoreQuery = {
 };
 
 export interface IFirebaseFireStoreService {
+  onSnapshot(
+    collection: string,
+    query: FireStoreQuery,
+    handler: <T>(data: T[]) => Promise<void>,
+    onError?: <T>(error: T) => Promise<void>,
+  ): Promise<void>;
   get<T extends Record<string, any>>(
     collection: string,
     query?: FireStoreQuery,
@@ -81,10 +90,23 @@ export class FirebaseFireStoreService implements IFirebaseFireStoreService {
     @Inject(FirebaseModuleOptions)
     options: FirebaseModuleOptions,
   ) {
-    initializeApp({
+    const app = initializeApp({
       credential: credential.cert(firebaseCredential),
     });
-    this._fireStore = getFirestore();
+    this._fireStore = getFirestore(app);
+  }
+
+  async onSnapshot(
+    collection: string,
+    query: FireStoreQuery,
+    handler: <T extends Record<string, any>>(data: T[]) => Promise<void>,
+    onError: <T>(err: T) => Promise<void>,
+  ): Promise<void> {
+    const ref = this._getRef(collection, query);
+    ref.onSnapshot(
+      (data) => handler(data.docs.map((data) => data.data())),
+      (err) => onError(err),
+    );
   }
 
   async get<T extends Record<string, any>>(
@@ -223,23 +245,29 @@ export class FirebaseFireStoreService implements IFirebaseFireStoreService {
       } else {
         const result = [];
         const data = where[key] as FireStoreOperation;
-        if (data.eq) {
+        if (!isUndefined(data.eq)) {
           result.push([key, '==', data.eq]);
         }
-        if (data.neq) {
+        if (!isUndefined(data.neq)) {
           result.push([key, '!=', data.neq]);
         }
-        if (data.lt) {
+        if (!isUndefined(data.lt)) {
           result.push([key, '<', data.lt]);
         }
-        if (data.lte) {
+        if (!isUndefined(data.lte)) {
           result.push([key, '<=', data.lte]);
         }
-        if (data.gt) {
+        if (!isUndefined(data.gt)) {
           result.push([key, '>', data.gt]);
         }
-        if (data.gte) {
+        if (!isUndefined(data.gte)) {
           result.push([key, '>=', data.gte]);
+        }
+        if (!isUndefined(data['array-contains'])) {
+          result.push([key, 'array-contains', data['array-contains']]);
+        }
+        if (!isUndefined(data.in)) {
+          result.push([key, 'in', data.in]);
         }
 
         return flatten(result);

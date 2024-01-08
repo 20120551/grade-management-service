@@ -1,10 +1,14 @@
-export class GradeTypeFinalizedEvent {
+import { EventStatus, EventType, NotificationTemplate } from '.';
+
+export class GradeTypeFinalizedEvent implements NotificationTemplate {
   senderId: string;
   recipientIds: string[];
   content: string;
   channel: string;
-  type: string;
+  type: EventType;
   redirectEndpoint: string;
+  isPublished: boolean = false;
+  status: EventStatus = 'processing';
   name = GradeTypeFinalizedEvent.name;
 
   constructor(
@@ -12,7 +16,7 @@ export class GradeTypeFinalizedEvent {
     recipientIds: string[],
     content: string,
     gradeTypeId: string,
-    type: string,
+    type: EventType,
     redirectEndpoint: string,
   ) {
     this.senderId = senderId;
