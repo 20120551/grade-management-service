@@ -4,9 +4,8 @@ import {
   ExecutionContext,
   Inject,
 } from '@nestjs/common';
-import { Auth0UserInfo, IAuth0Service } from 'utils/auth0';
+import { IAuth0Service } from 'utils/auth0';
 import { UnauthorizedException } from 'utils/errors/domain.error';
-import { createCamelCaseFromObject } from 'utils/request';
 import { Request } from 'express';
 import { UserResponse } from 'guards';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -37,18 +36,7 @@ export class AuthenticatedGuard implements CanActivate {
       throw new UnauthorizedException('Invalid Token');
     }
 
-    // const userInfo = await this._auth0Service.verifyToken({
-    //   access_token: accessToken,
-    // });
-
-    // const camelCase = createCamelCaseFromObject<Auth0UserInfo, UserResponse>(
-    //   userInfo,
-    // );
-    request.user = {
-      ...userInfo,
-      userId: userInfo['sub'],
-      userMetadata: userInfo.appMetadata || {},
-    };
+    request.user = userInfo;
     return true;
   }
 }

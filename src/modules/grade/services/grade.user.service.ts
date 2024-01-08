@@ -375,10 +375,6 @@ export class GradeStudentService implements IGradeStudentService {
     worksheet.commit();
     workbook.commit();
 
-    await fs.promises.writeFile(
-      'D:\\SOURCE CODE\\Project\\graduation\\Backend\\webnc\\test.xlsx',
-      stream,
-    );
     return {
       buffer: stream,
       ext: 'xlsx',
