@@ -61,8 +61,6 @@ export class GradeTypeRoleGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    console.log(role, allowRoles);
-
     if (allowRoles.flat().some((_role) => _role === role)) {
       return true;
     }

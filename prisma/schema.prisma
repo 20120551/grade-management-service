@@ -113,6 +113,7 @@ model UserCourseGrade {
   gradeTypeId  String        @map("grade_type_id")
   gradeType    GradeType     @relation(fields: [gradeTypeId], references: [id], onDelete: Cascade)
   studentId    String        @map("student_id")
+  courseId     String        @map("course_id")
   point        Float
   gradeReviews GradeReview[]
 

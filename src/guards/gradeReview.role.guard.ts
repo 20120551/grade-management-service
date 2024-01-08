@@ -39,27 +39,19 @@ export class GradeReviewRoleGuard implements CanActivate {
         userId: true,
         userCourseGrade: {
           select: {
-            gradeType: {
-              select: {
-                gradeStructure: {
-                  select: {
-                    courseId: true,
-                  },
-                },
-              },
-            },
+            courseId: true,
           },
         },
       },
     });
 
-    if (!gradeReview?.userCourseGrade?.gradeType?.gradeStructure?.courseId) {
+    if (!gradeReview?.userCourseGrade?.courseId) {
       throw new UnauthorizedException("You don't have permission");
     }
 
     const { role } = await this._prismaService.userCourse.findFirst({
       where: {
-        courseId: gradeReview.userCourseGrade.gradeType.gradeStructure.courseId,
+        courseId: gradeReview.userCourseGrade.courseId,
         userId,
       },
     });

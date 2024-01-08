@@ -18,9 +18,10 @@ import {
 } from '@nestjs/common';
 import { IGradeStudentService } from '../services';
 import { FilterDto, UpsertGradeStudentDto } from '../resources/dto';
-import { User } from 'utils/decorator/parameters';
+import { Course, User } from 'utils/decorator/parameters';
 import {
   AuthenticatedGuard,
+  CourseResponse,
   UseCoursePolicies,
   UseGradeTypePolicies,
   UserResponse,
@@ -70,8 +71,10 @@ export class GradeStudentController {
   addStudentGrade(
     @Param('id') gradeTypeId: string,
     @Body() upsertGradeStudentDto: UpsertGradeStudentDto,
+    @Course() course: CourseResponse,
   ) {
     return this._gradeStudentService.addCourseGrade(
+      course.courseId,
       gradeTypeId,
       upsertGradeStudentDto,
     );
@@ -119,6 +122,7 @@ export class GradeStudentController {
     )
     file: Express.Multer.File,
     @Param('id') gradeTypeId: string,
+    @Course() course: CourseResponse,
   ) {
     const payload = {
       filename: file.originalname,
@@ -127,6 +131,7 @@ export class GradeStudentController {
     };
 
     const userResponse = await this._gradeStudentService.batchCourseGrade(
+      course.courseId,
       gradeTypeId,
       payload,
     );

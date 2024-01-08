@@ -34,6 +34,7 @@ export interface IGradeStudentService {
     gradeTypeId: string,
   ): Promise<StudentGradeResponse>;
   addCourseGrade(
+    courseId: string,
     gradeTypeId: string,
     upsertGradeStudentDto: UpsertGradeStudentDto,
   ): Promise<StudentGradeResponse>;
@@ -43,6 +44,7 @@ export interface IGradeStudentService {
   ): Promise<StudentGradeResponse>;
   deleteCourseGrade(studentId: string, gradeTypeId: string): Promise<void>;
   batchCourseGrade(
+    courseId: string,
     gradeTypeId: string,
     gradeTemplate: UploadFileDto,
   ): Promise<BatchResponse>;
@@ -171,12 +173,14 @@ export class GradeStudentService implements IGradeStudentService {
   }
 
   async addCourseGrade(
+    courseId: string,
     gradeTypeId: string,
     upsertGradeStudentDto: UpsertGradeStudentDto,
   ): Promise<StudentGradeResponse> {
     const result = await this._prismaService.userCourseGrade.create({
       data: {
         gradeTypeId,
+        courseId,
         studentId: upsertGradeStudentDto.studentId,
         point: upsertGradeStudentDto.point,
       },
@@ -219,6 +223,7 @@ export class GradeStudentService implements IGradeStudentService {
   }
 
   async batchCourseGrade(
+    courseId: string,
     gradeTypeId: string,
     gradeTemplate: UploadFileDto,
   ): Promise<BatchResponse> {
@@ -265,12 +270,11 @@ export class GradeStudentService implements IGradeStudentService {
         !create.some((create) => create.studentId === student.studentId),
     );
 
-    console.log(create, update);
-
     const result = await this._prisma.$transaction(
       async (context) => {
         const result = await context.userCourseGrade.createMany({
           data: create.map((data) => ({
+            courseId,
             studentId: data.studentId,
             point: data.grade,
             gradeTypeId,

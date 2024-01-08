@@ -29,6 +29,10 @@ export interface UserResponse {
   appMetadata: UserAppMetadata;
 }
 
+export interface CourseResponse {
+  courseId: string;
+}
+
 export const CourseRoles = (...roles: any[]) =>
   SetMetadata(COURSE_ROLES_KEY, roles);
 
