@@ -22,6 +22,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { GradeBoardHeader, GradeBoardResponse } from '../resources/response';
 import { IFirebaseFireStoreService } from 'utils/firebase';
 import { NotificationTemplate } from '../resources/events';
+import { streamToBuffer } from 'utils/file';
 
 export const IGradeStructureService = 'IGradeStructureService';
 export interface IGradeStructureService {
@@ -276,7 +277,7 @@ export class GradeStructureService implements IGradeStructureService {
     workbook.commit();
 
     return {
-      buffer: stream,
+      buffer: await streamToBuffer(stream),
       fileName: 'grade-board.xlsx',
       ext: 'xlsx',
     };

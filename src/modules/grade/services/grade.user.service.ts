@@ -22,6 +22,7 @@ import {
 } from '@prisma/client';
 import fs from 'fs';
 import { differenceBy, isEmpty } from 'lodash';
+import { streamToBuffer } from 'utils/file';
 
 export const IGradeStudentService = 'IGradeStudentService';
 export interface IGradeStudentService {
@@ -376,7 +377,7 @@ export class GradeStudentService implements IGradeStudentService {
     workbook.commit();
 
     return {
-      buffer: stream,
+      buffer: await streamToBuffer(stream),
       ext: 'xlsx',
       fileName: 'import-grade.xlsx',
     };

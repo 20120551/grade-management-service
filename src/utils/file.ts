@@ -9,3 +9,14 @@ export const isFile = (path: string) => {
 
   return path.includes('.');
 };
+
+export const streamToBuffer = async (stream) => {
+  const buffers = [];
+
+  for await (const data of stream) {
+    buffers.push(data);
+  }
+
+  const finalBuffer = Buffer.concat(buffers);
+  return finalBuffer;
+};
