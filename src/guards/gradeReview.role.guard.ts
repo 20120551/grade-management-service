@@ -65,6 +65,10 @@ export class GradeReviewRoleGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
+    req.course = {
+      courseId: gradeReview.userCourseGrade.courseId,
+    };
+
     if (
       allowRoles.flat().some((_role) => _role === role) ||
       userId === gradeReview.userId

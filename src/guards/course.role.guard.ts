@@ -47,6 +47,9 @@ export class CourseRoleGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
+    req.course = {
+      courseId,
+    };
     if (allowRoles.flat().some((_role) => _role === role)) {
       return true;
     }
