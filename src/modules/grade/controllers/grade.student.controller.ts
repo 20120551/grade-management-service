@@ -17,7 +17,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { IGradeStudentService } from '../services';
-import { FilterDto, UpsertGradeStudentDto } from '../resources/dto';
+import {
+  FilterDto,
+  UpsertGradeStudentByGradeTypeDto,
+  UpsertGradeStudentDto,
+} from '../resources/dto';
 import { Course, User } from 'utils/decorator/parameters';
 import {
   AuthenticatedGuard,
