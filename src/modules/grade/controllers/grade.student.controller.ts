@@ -108,7 +108,7 @@ export class GradeStudentController {
     @Param('id') gradeTypeId: string,
     @Query() { studentId }: { studentId: string },
   ) {
-    return this._gradeStudentService.deleteCourseGrade(gradeTypeId, studentId);
+    return this._gradeStudentService.deleteCourseGrade(studentId, gradeTypeId);
   }
 
   @UseGradeTypePolicies({
