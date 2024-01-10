@@ -72,7 +72,7 @@ export class GradeStudentService implements IGradeStudentService {
     data: UpsertGradeStudentByGradeTypeDto[],
   ): Promise<UserCourseGrade[]> {
     const filterdData = data.filter(
-      (grade) => grade.point !== 0 && grade.point,
+      (grade) => grade.point === 0 || grade.point,
     );
     if (isEmpty(filterdData)) {
       return [];
@@ -88,7 +88,7 @@ export class GradeStudentService implements IGradeStudentService {
     });
 
     if (
-      JSON.parse(student.students.toString()).some(
+      JSON.parse(student.students.toString()).every(
         (student) => student.studentId !== studentId,
       )
     ) {
