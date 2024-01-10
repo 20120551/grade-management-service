@@ -204,7 +204,7 @@ export class GradeStudentService implements IGradeStudentService {
       throw new BadRequestException('not found grade with student id');
     }
 
-    if (isEmpty(gradeType.gradeSubTypes)) {
+    if (!isEmpty(gradeType.gradeSubTypes)) {
       const points = await BPromise.map(
         gradeType.gradeSubTypes,
         async (gradeType) => {
@@ -220,7 +220,6 @@ export class GradeStudentService implements IGradeStudentService {
 
           return {
             point: data.point,
-            ...gradeType,
           };
         },
       );
@@ -229,8 +228,6 @@ export class GradeStudentService implements IGradeStudentService {
         (val, point) => point.point + val,
         0,
       );
-
-      userCourseGrade['subGradeTypes'] = points;
     }
 
     return userCourseGrade;

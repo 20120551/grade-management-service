@@ -1,5 +1,5 @@
 import {
-  CloseGradeReviewResultCommandHandler,
+  FinalizedGradeReviewCommandHandler,
   CreateGradeReviewCommandHandler,
   CreateGradeReviewResultCommandHandler,
   DeleteGradeReviewCommandHandler,
@@ -16,7 +16,7 @@ export const QueryHandlers = [
   GradeReviewDetailQueryHandler,
 ];
 export const CommandHandlers = [
-  CloseGradeReviewResultCommandHandler,
+  FinalizedGradeReviewCommandHandler,
   CreateGradeReviewCommandHandler,
   CreateGradeReviewResultCommandHandler,
   DeleteGradeReviewCommandHandler,
