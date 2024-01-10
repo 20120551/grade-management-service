@@ -4,6 +4,7 @@ import { BadRequestException } from 'utils/errors/domain.error';
 import {
   FilterDto,
   UploadFileDto,
+  UpsertGradeStudentByGradeTypeDto,
   UpsertGradeStudentDto,
 } from '../resources/dto';
 import {
@@ -20,7 +21,6 @@ import {
   StudentCard,
   UserCourseGrade,
 } from '@prisma/client';
-import fs from 'fs';
 import { differenceBy, isEmpty } from 'lodash';
 import { streamToBuffer } from 'utils/file';
 
@@ -43,6 +43,11 @@ export interface IGradeStudentService {
     gradeTypeId: string,
     upsertGradeStudentDto: UpsertGradeStudentDto,
   ): Promise<StudentGradeResponse>;
+  batchCourseGradeForStudent(
+    courseId: string,
+    studentId: string,
+    data: UpsertGradeStudentByGradeTypeDto[],
+  ): Promise<UserCourseGrade[]>;
   deleteCourseGrade(studentId: string, gradeTypeId: string): Promise<void>;
   batchCourseGrade(
     courseId: string,
@@ -60,6 +65,64 @@ export class GradeStudentService implements IGradeStudentService {
     private readonly _prisma: PrismaClient,
     private readonly _prismaService: PrismaService,
   ) {}
+
+  async batchCourseGradeForStudent(
+    courseId: string,
+    studentId: string,
+    data: UpsertGradeStudentByGradeTypeDto[],
+  ): Promise<UserCourseGrade[]> {
+    const filterdData = data.filter(
+      (grade) => grade.point === 0 || grade.point,
+    );
+    if (isEmpty(filterdData)) {
+      return [];
+    }
+
+    const student = await this._prismaService.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      select: {
+        students: true,
+      },
+    });
+
+    if (
+      JSON.parse(student.students.toString()).every(
+        (student) => student.studentId !== studentId,
+      )
+    ) {
+      throw new BadRequestException('student does not appear in course');
+    }
+
+    const res = await this._prisma.$transaction(async (context) => {
+      const res = await BPromise.map(filterdData, async (upsertData) => {
+        const res = await context.userCourseGrade.upsert({
+          where: {
+            gradeTypeId_studentId: {
+              gradeTypeId: upsertData.gradeTypeId,
+              studentId: studentId,
+            },
+          },
+          create: {
+            point: upsertData.point,
+            studentId,
+            gradeTypeId: upsertData.gradeTypeId,
+            courseId,
+          },
+          update: {
+            point: upsertData.point,
+          },
+        });
+
+        return res;
+      });
+
+      return res;
+    });
+
+    return res;
+  }
 
   async getGradeTypeGrade(
     gradeTypeId: string,

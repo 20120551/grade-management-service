@@ -48,12 +48,17 @@ export class GradeStructureRoleGuard implements CanActivate {
       throw new UnauthorizedException("You don't have permission");
     }
 
-    const { role } = await this._prismaService.userCourse.findFirst({
+    const course = await this._prismaService.userCourse.findFirst({
       where: {
         courseId: gradeStructure.courseId,
         userId,
       },
     });
+
+    const role = course?.role;
+    if (!role) {
+      return false;
+    }
 
     const allowRoles = this._reflector.getAllAndOverride<any[]>(
       COURSE_ROLES_KEY,

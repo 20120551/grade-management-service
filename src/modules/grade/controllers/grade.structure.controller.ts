@@ -13,7 +13,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { IGradeStructureService, IGradeTypeService } from '../services';
+import {
+  IGradeStructureService,
+  IGradeStudentService,
+  IGradeTypeService,
+} from '../services';
 import {
   CreateGradeStructureDto,
   CreateGradeTypeDto,
@@ -25,15 +29,17 @@ import {
   GradeTypeFilterDto,
   UpdateGradeStructureDto,
   UpdateGradeTypeDto,
+  UpsertGradeStudentByGradeTypeDto,
 } from '../resources/dto';
 import {
   AuthenticatedGuard,
+  CourseResponse,
   UseCoursePolicies,
   UseGradeStructurePolicies,
   UseGradeTypePolicies,
   UserResponse,
 } from 'guards';
-import { User } from 'utils/decorator/parameters';
+import { Course, User } from 'utils/decorator/parameters';
 import { UserCourseRole } from '@prisma/client';
 
 @UseGuards(AuthenticatedGuard)
@@ -44,6 +50,8 @@ export class GradeStructureController {
     private readonly _gradeStructureService: IGradeStructureService,
     @Inject(IGradeTypeService)
     private readonly _gradeTypeService: IGradeTypeService,
+    @Inject(IGradeStudentService)
+    private readonly _gradeStudentService: IGradeStudentService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -104,6 +112,26 @@ export class GradeStructureController {
       id,
       finalizeGradeStructure,
     );
+  }
+
+  @UseGradeStructurePolicies({
+    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+  })
+  @HttpCode(HttpStatus.OK)
+  @Put('/:id/student/:studentId')
+  async batchStudentGrade(
+    @Param('studentId') studentId: string,
+    @Course() course: CourseResponse,
+    @Body() data: UpsertGradeStudentByGradeTypeDto[],
+  ) {
+    const userResponse =
+      await this._gradeStudentService.batchCourseGradeForStudent(
+        course.courseId,
+        studentId,
+        data,
+      );
+
+    return userResponse;
   }
 
   @UseGradeStructurePolicies({
