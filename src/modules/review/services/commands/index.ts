@@ -3,4 +3,4 @@ export * from './updateGradeReview.command';
 export * from './deleteGradeReview.command';
 export * from './createGradeReviewResult.command';
 export * from './reAssignGradeReviewResult.command';
-export * from './closeGradeReviewResult.command';
+export * from './finalizedGradeReview.command';

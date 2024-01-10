@@ -1,4 +1,5 @@
 import { ICommand } from '@nestjs/cqrs';
+import { GradeReviewStatus } from '@prisma/client';
 
 export class UpdateGradeReviewCommand implements ICommand {
   constructor(

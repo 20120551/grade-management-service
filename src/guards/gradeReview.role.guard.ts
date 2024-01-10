@@ -6,9 +6,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { COURSE_ROLES_KEY } from 'configurations/role.config';
+import { COURSE_ROLES_KEY, POLICIES_KEY } from 'configurations/role.config';
 import { Request } from 'express';
-import { CourseRoles, UseCourseRoleOptions } from 'guards';
+import { CoursePolicies, CourseRoles, UseCourseRoleOptions } from 'guards';
+import { isEmpty } from 'lodash';
 import { UnauthorizedException } from 'utils/errors/domain.error';
 import { PrismaService } from 'utils/prisma';
 
@@ -70,15 +71,32 @@ export class GradeReviewRoleGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
+    const policies = this._reflector.getAllAndOverride<any[]>(POLICIES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     req.course = {
       courseId: gradeReview.userCourseGrade.courseId,
     };
 
-    if (
-      allowRoles.flat().some((_role) => _role === role) ||
-      userId === gradeReview.userId
-    ) {
+    if (isEmpty(allowRoles) && isEmpty(policies)) {
       return true;
+    } else if (isEmpty(allowRoles)) {
+      if (userId === gradeReview.userId) {
+        return true;
+      }
+    } else if (isEmpty(policies)) {
+      if (allowRoles.flat().some((_role) => _role === role)) {
+        return true;
+      }
+    } else {
+      if (
+        allowRoles.flat().some((_role) => _role === role) &&
+        userId === gradeReview.userId
+      ) {
+        return true;
+      }
     }
 
     return false;
@@ -90,6 +108,7 @@ export const UseGradeReviewPolicies = (
 ): ClassDecorator & MethodDecorator => {
   return (target: Function, prop?: string, descriptor?: PropertyDescriptor) => {
     CourseRoles(options.roles)(target, prop, descriptor);
+    CoursePolicies(options.policies)(target, prop, descriptor);
     UseGuards(GradeReviewRoleGuard)(target, prop, descriptor);
   };
 };

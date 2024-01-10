@@ -1,6 +1,6 @@
 import { SetMetadata } from '@nestjs/common';
 import { UserCourseRole } from '@prisma/client';
-import { COURSE_ROLES_KEY } from 'configurations/role.config';
+import { COURSE_ROLES_KEY, POLICIES_KEY } from 'configurations/role.config';
 
 export type UserProviderSupport = 'google-oauth2' | 'facebook' | 'auth0';
 export interface UserUserIdentity {
@@ -29,6 +29,10 @@ export interface UserResponse {
   appMetadata: UserAppMetadata;
 }
 
+export enum CoursePolicy {
+  OWNER,
+}
+
 export interface CourseResponse {
   courseId: string;
 }
@@ -36,8 +40,12 @@ export interface CourseResponse {
 export const CourseRoles = (...roles: any[]) =>
   SetMetadata(COURSE_ROLES_KEY, roles);
 
+export const CoursePolicies = (...policies: any[]) =>
+  SetMetadata(POLICIES_KEY, policies);
+
 export interface UseCourseRoleOptions {
   roles?: UserCourseRole[];
+  policies?: CoursePolicy[];
 }
 
 export * from './authenticated.guard';

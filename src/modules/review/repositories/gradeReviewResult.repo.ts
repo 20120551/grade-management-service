@@ -1,7 +1,7 @@
 import { PrismaService } from 'utils/prisma';
 import { plainToInstance } from 'class-transformer';
 import { GradeReviewEntity } from '../entities';
-import { GradeReviewResult } from '@prisma/client';
+import { GradeReviewResult, PrismaClient } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 export const IGradeReviewRepo = 'IGradeReviewRepo';
