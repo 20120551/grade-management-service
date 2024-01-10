@@ -19,7 +19,4 @@ export class CreateGradeReviewDto extends UpsertGradeReviewDto {
 }
 
 export class UpdateGradeReviewDto extends UpsertGradeReviewDto {}
-export class FinalizedGradeReviewDto extends UpsertGradeReviewDto {
-  @IsString()
-  status: GradeReviewStatus;
-}
+export class FinalizedGradeReviewDto {}
