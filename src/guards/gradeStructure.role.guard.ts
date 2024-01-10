@@ -60,6 +60,9 @@ export class GradeStructureRoleGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
+    req.course = {
+      courseId: gradeStructure.courseId,
+    };
     if (allowRoles.flat().some((_role) => _role === role)) {
       return true;
     }
