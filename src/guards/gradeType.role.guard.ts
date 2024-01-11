@@ -10,6 +10,7 @@ import { UserCourseRole } from '@prisma/client';
 import { COURSE_ROLES_KEY } from 'configurations/role.config';
 import { Request } from 'express';
 import { CourseRoles, UseCourseRoleOptions } from 'guards';
+import { isEmpty } from 'lodash';
 import { UnauthorizedException } from 'utils/errors/domain.error';
 import { PrismaService } from 'utils/prisma';
 
@@ -72,6 +73,10 @@ export class GradeTypeRoleGuard implements CanActivate {
     req.course = {
       courseId: gradeType.gradeStructure.courseId,
     };
+
+    if (isEmpty(allowRoles)) {
+      return true;
+    }
 
     if (allowRoles.flat().some((_role) => _role === role)) {
       return true;

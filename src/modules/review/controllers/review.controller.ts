@@ -16,9 +16,9 @@ import {
   AuthenticatedGuard,
   CoursePolicy,
   CourseResponse,
-  CourseRoleGuard,
   UseGradeReviewPolicies,
   UseGradeReviewResultPolicies,
+  UseGradeTypePolicies,
   UserResponse,
 } from 'guards';
 import { Course, User } from 'utils/decorator/parameters';
@@ -58,6 +58,7 @@ export class ReviewController {
     return this._queryBus.execute(query);
   }
 
+  @UseGradeTypePolicies({})
   @HttpCode(HttpStatus.CREATED)
   @Post('')
   createGradeReview(

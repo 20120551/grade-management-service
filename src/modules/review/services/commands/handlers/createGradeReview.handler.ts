@@ -5,6 +5,7 @@ import { GradeReview, UserCourseRole } from '@prisma/client';
 import { IFirebaseFireStoreService } from 'utils/firebase';
 import { Inject } from '@nestjs/common';
 import { NotificationTemplate } from 'modules/review/resources/events';
+import { BadRequestException } from 'utils/errors/domain.error';
 
 @CommandHandler(CreateGradeReviewCommand)
 export class CreateGradeReviewCommandHandler
@@ -17,8 +18,37 @@ export class CreateGradeReviewCommandHandler
   ) {}
 
   async execute(command: CreateGradeReviewCommand): Promise<GradeReview> {
+    const user = await this._prismaService.studentCard.findUnique({
+      where: {
+        userId: command.userId,
+      },
+      select: {
+        studentId: true,
+      },
+    });
+
+    if (!user.studentId) {
+      throw new BadRequestException('Not found student id');
+    }
+
+    const userCourseGrade =
+      await this._prismaService.userCourseGrade.findUnique({
+        where: {
+          gradeTypeId_studentId: {
+            gradeTypeId: command.gradeTypeId,
+            studentId: user.studentId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
     const gradeReview = await this._prismaService.gradeReview.create({
-      data: command,
+      data: {
+        ...command,
+        userCourseGradeId: userCourseGrade.id,
+      },
     });
 
     const teacherIds = await this._prismaService.userCourse.findMany({
