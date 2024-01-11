@@ -40,11 +40,14 @@ import {
   UpdateGradeReviewCommand,
 } from '../services/commands';
 import { plainToInstance } from 'class-transformer';
-import { GetGradeReviewQuery } from '../services/queries';
+import {
+  GetGradeReviewDetailQuery,
+  GetGradeReviewQuery,
+} from '../services/queries';
 import { UserCourseRole } from '@prisma/client';
 
 @UseGuards(AuthenticatedGuard)
-@Controller('api/grade/review')
+@Controller('api/review/grade')
 export class ReviewController {
   constructor(
     private readonly _commandBus: CommandBus,
@@ -53,8 +56,14 @@ export class ReviewController {
 
   @HttpCode(HttpStatus.OK)
   @Get('')
-  getGradeReview(@Query() filter: GetGradeReviewFilterDto) {
-    const query = plainToInstance(GetGradeReviewQuery, filter);
+  getGradeReview(
+    @Query() filter: GetGradeReviewFilterDto,
+    @User() user: UserResponse,
+  ) {
+    const query = plainToInstance(GetGradeReviewQuery, {
+      ...filter,
+      userId: user.userId,
+    });
     return this._queryBus.execute(query);
   }
 
@@ -81,7 +90,7 @@ export class ReviewController {
   @HttpCode(HttpStatus.OK)
   @Get('/:id')
   getGradeReviewDetail(@Param('id') id: string, @Query() filter: FilterDto) {
-    const query = plainToInstance(GetGradeReviewQuery, {
+    const query = plainToInstance(GetGradeReviewDetailQuery, {
       gradeReviewId: id,
       ...filter,
     });

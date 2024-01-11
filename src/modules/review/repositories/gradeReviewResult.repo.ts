@@ -32,10 +32,11 @@ export class GradeReviewRepo implements IGradeReviewRepo {
 
   async persist(entity: GradeReviewEntity): Promise<void> {
     const lastEvent = await this._findLastEvent(entity.id);
+    const lastVersion = lastEvent ? lastEvent.version : 0;
 
     const events = entity.getUncommittedEvents().map((data, index) => ({
       ...data,
-      version: lastEvent.version + index + 1,
+      version: lastVersion + index + 1,
     }));
 
     await this._prismaService.gradeReviewResult.createMany({

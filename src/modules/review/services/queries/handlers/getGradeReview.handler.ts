@@ -11,10 +11,26 @@ export class GradeReviewQueryHandler
   constructor(private readonly _prismaService: PrismaService) {}
 
   async execute(query: GetGradeReviewQuery): Promise<UserCourseGrade> {
+    const user = await this._prismaService.studentCard.findUnique({
+      where: {
+        userId: query.userId,
+      },
+      select: {
+        studentId: true,
+      },
+    });
+
+    if (!user.studentId) {
+      throw new BadRequestException('Not found student id');
+    }
+
     const userCourseGrade =
       await this._prismaService.userCourseGrade.findUnique({
         where: {
-          id: query.userCourseGradeId,
+          gradeTypeId_studentId: {
+            gradeTypeId: query.gradeTypeId,
+            studentId: user.studentId,
+          },
         },
         include: {
           gradeReviews: {
@@ -26,7 +42,7 @@ export class GradeReviewQueryHandler
 
     if (!userCourseGrade) {
       throw new BadRequestException(
-        `not found grade type id ${query.userCourseGradeId}`,
+        `not found grade type id ${query.gradeTypeId}`,
       );
     }
 
