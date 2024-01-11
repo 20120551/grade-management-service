@@ -1,13 +1,15 @@
 import { PrismaService } from 'utils/prisma';
 import { plainToInstance } from 'class-transformer';
 import { GradeReviewEntity } from '../entities';
-import { GradeReviewResult, PrismaClient } from '@prisma/client';
+import { GradeReview, GradeReviewResult, PrismaClient } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 export const IGradeReviewRepo = 'IGradeReviewRepo';
 export interface IGradeReviewRepo {
   findById(aggregateId: string): Promise<GradeReviewEntity | null>;
-  persist(entity: GradeReviewEntity): Promise<void>;
+  persist(
+    entity: GradeReviewEntity,
+  ): Promise<GradeReview & { gradeReviewResults: GradeReviewResult[] }>;
 }
 
 @Injectable()
@@ -30,7 +32,9 @@ export class GradeReviewRepo implements IGradeReviewRepo {
     return entity;
   }
 
-  async persist(entity: GradeReviewEntity): Promise<void> {
+  async persist(
+    entity: GradeReviewEntity,
+  ): Promise<GradeReview & { gradeReviewResults: GradeReviewResult[] }> {
     const lastEvent = await this._findLastEvent(entity.id);
     const lastVersion = lastEvent ? lastEvent.version : 0;
 
@@ -44,6 +48,11 @@ export class GradeReviewRepo implements IGradeReviewRepo {
     });
 
     entity.commit();
+
+    return {
+      ...entity,
+      gradeReviewResults: events,
+    };
   }
 
   private async _findLastEvent(

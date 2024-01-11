@@ -18,6 +18,7 @@ import {
   CourseResponse,
   UseGradeReviewPolicies,
   UseGradeReviewResultPolicies,
+  UseGradeStructurePolicies,
   UseGradeTypePolicies,
   UserResponse,
 } from 'guards';
@@ -29,6 +30,7 @@ import {
   FinalizedGradeReviewDto,
   GetGradeReviewByTeacherFilterDto,
   GetGradeReviewFilterDto,
+  GetGradeReviewInCourseOfStudentDto,
   UpdateGradeReviewDto,
   UpdateGradeReviewResultDto,
 } from '../resources/dto';
@@ -44,6 +46,7 @@ import { plainToInstance } from 'class-transformer';
 import {
   GetGradeReviewByTeacherQuery,
   GetGradeReviewDetailQuery,
+  GetGradeReviewInCourseOfStudentQuery,
   GetGradeReviewQuery,
 } from '../services/queries';
 import { UserCourseRole } from '@prisma/client';
@@ -65,6 +68,26 @@ export class ReviewController {
     const query = plainToInstance(GetGradeReviewQuery, {
       ...filter,
       userId: user.userId,
+    });
+    return this._queryBus.execute(query);
+  }
+
+  @UseGradeStructurePolicies({
+    roles: [
+      UserCourseRole.TEACHER,
+      UserCourseRole.HOST,
+      UserCourseRole.STUDENT,
+    ],
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get('course')
+  getGradeReviewInCourseOfStuent(
+    @Query() filter: GetGradeReviewInCourseOfStudentDto,
+    @Course() course: CourseResponse,
+  ) {
+    const query = plainToInstance(GetGradeReviewInCourseOfStudentQuery, {
+      ...filter,
+      courseId: course.courseId,
     });
     return this._queryBus.execute(query);
   }

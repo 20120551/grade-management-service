@@ -19,6 +19,9 @@ export class GradeReviewDetailQueryHandler
         gradeReviewResults: {
           take: query.take,
           skip: query.skip,
+          include: {
+            teacher: true,
+          },
         },
       },
     });

@@ -80,13 +80,13 @@ export class GradeReviewRoleGuard implements CanActivate {
       courseId: gradeReview.userCourseGrade.courseId,
     };
 
-    if (isEmpty(allowRoles) && isEmpty(policies)) {
+    if (isEmpty(allowRoles[0]) && isEmpty(policies[0])) {
       return true;
-    } else if (isEmpty(allowRoles)) {
+    } else if (isEmpty(allowRoles[0])) {
       if (userId === gradeReview.userId) {
         return true;
       }
-    } else if (isEmpty(policies)) {
+    } else if (isEmpty(policies[0])) {
       if (allowRoles.flat().some((_role) => _role === role)) {
         return true;
       }

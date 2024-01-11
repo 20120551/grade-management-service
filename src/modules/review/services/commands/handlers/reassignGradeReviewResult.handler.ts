@@ -35,7 +35,7 @@ export class ReAssignGradeReviewResultCommandHandler
     gradeReview.reAssignGradeReview(
       plainToInstance(ReAssignGradeReviewResultEvent, command),
     );
-    await this._gradeReviewRepo.persist(gradeReview);
+    const res = await this._gradeReviewRepo.persist(gradeReview);
     // TODO: add firebase event
     const event: NotificationTemplate = {
       senderId: command.teacherId,
@@ -49,6 +49,6 @@ export class ReAssignGradeReviewResultCommandHandler
     };
 
     await this._fireStore.create('notifications', event);
-    return gradeReview;
+    return res;
   }
 }

@@ -33,7 +33,7 @@ export class CreateGradeReviewResultCommandHandler
     gradeReview.createGradeReview(
       plainToInstance(CreateGradeReviewResultEvent, command),
     );
-    await this._gradeReviewRepo.persist(gradeReview);
+    const res = await this._gradeReviewRepo.persist(gradeReview);
 
     // TODO: add firebase event
     const event: NotificationTemplate = {
@@ -49,6 +49,6 @@ export class CreateGradeReviewResultCommandHandler
 
     await this._fireStore.create('notifications', event);
 
-    return gradeReview;
+    return res;
   }
 }

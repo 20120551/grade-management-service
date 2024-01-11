@@ -24,3 +24,10 @@ export class GetGradeReviewByTeacherFilterDto extends FilterDto {
   @IsString()
   studentId: string;
 }
+
+export class GetGradeReviewInCourseOfStudentDto extends FilterDto {
+  @IsString()
+  gradeStructureId: string;
+  @IsString()
+  studentId: string;
+}
