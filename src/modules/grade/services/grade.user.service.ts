@@ -246,7 +246,6 @@ export class GradeStudentService implements IGradeStudentService {
       );
     }
 
-    console.log(userCourseGrade);
     return {
       point: userCourseGrade.point,
       studentId: user.studentCard.studentId,
