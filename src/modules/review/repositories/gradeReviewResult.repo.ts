@@ -7,9 +7,7 @@ import { Injectable } from '@nestjs/common';
 export const IGradeReviewRepo = 'IGradeReviewRepo';
 export interface IGradeReviewRepo {
   findById(aggregateId: string): Promise<GradeReviewEntity | null>;
-  persist(
-    entity: GradeReviewEntity,
-  ): Promise<GradeReview & { gradeReviewResults: GradeReviewResult[] }>;
+  persist(entity: GradeReviewEntity): Promise<void>;
 }
 
 @Injectable()
@@ -32,9 +30,7 @@ export class GradeReviewRepo implements IGradeReviewRepo {
     return entity;
   }
 
-  async persist(
-    entity: GradeReviewEntity,
-  ): Promise<GradeReview & { gradeReviewResults: GradeReviewResult[] }> {
+  async persist(entity: GradeReviewEntity): Promise<void> {
     const lastEvent = await this._findLastEvent(entity.id);
     const lastVersion = lastEvent ? lastEvent.version : 0;
 
@@ -48,11 +44,6 @@ export class GradeReviewRepo implements IGradeReviewRepo {
     });
 
     entity.commit();
-
-    return {
-      ...entity,
-      gradeReviewResults: events,
-    };
   }
 
   private async _findLastEvent(
