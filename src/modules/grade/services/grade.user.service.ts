@@ -137,10 +137,19 @@ export class GradeStudentService implements IGradeStudentService {
       select: {
         studentId: true,
         point: true,
+        gradeType: {
+          select: {
+            status: true,
+          },
+        },
       },
     });
 
-    return userCourseGrade;
+    const res = userCourseGrade.map(({ gradeType, ...payload }) => ({
+      ...payload,
+      status: gradeType.status,
+    }));
+    return res;
   }
 
   async getStudentGradeInGradeType(
@@ -158,6 +167,7 @@ export class GradeStudentService implements IGradeStudentService {
             id: true,
             percentage: true,
             label: true,
+            status: true,
           },
         },
       },
@@ -230,7 +240,11 @@ export class GradeStudentService implements IGradeStudentService {
       );
     }
 
-    return userCourseGrade;
+    return {
+      point: userCourseGrade.point,
+      studentId: user.studentCard.studentId,
+      status: gradeType.status,
+    };
   }
 
   async addCourseGrade(

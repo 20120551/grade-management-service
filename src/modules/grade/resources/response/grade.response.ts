@@ -9,6 +9,7 @@ export interface StudentGradeTemplateResponse {
 export interface StudentGradeResponse {
   point: number;
   studentId?: string;
+  status?: string;
 }
 
 export interface GradeBoardResponse {
