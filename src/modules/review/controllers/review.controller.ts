@@ -58,7 +58,7 @@ export class ReviewController {
     return this._queryBus.execute(query);
   }
 
-  @UseGradeTypePolicies({})
+  @UseGradeTypePolicies({ roles: [UserCourseRole.STUDENT] })
   @HttpCode(HttpStatus.CREATED)
   @Post('')
   createGradeReview(

@@ -19,6 +19,7 @@ export class CreateGradeReviewCommandHandler
 
   async execute({
     gradeTypeId,
+    courseId,
     ...command
   }: CreateGradeReviewCommand): Promise<GradeReview> {
     const user = await this._prismaService.studentCard.findUnique({
@@ -56,7 +57,7 @@ export class CreateGradeReviewCommandHandler
 
     const teacherIds = await this._prismaService.userCourse.findMany({
       where: {
-        courseId: command.courseId,
+        courseId: courseId,
         role: {
           in: [UserCourseRole.HOST, UserCourseRole.TEACHER],
         },
