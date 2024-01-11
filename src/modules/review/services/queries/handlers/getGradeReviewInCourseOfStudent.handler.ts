@@ -20,6 +20,7 @@ export class GradeReviewByTeacherQueryHandler
           },
         },
         include: {
+          gradeType: true,
           gradeReviews: {
             take: query.take,
             skip: query.skip,
