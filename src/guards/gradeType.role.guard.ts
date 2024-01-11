@@ -74,10 +74,6 @@ export class GradeTypeRoleGuard implements CanActivate {
       courseId: gradeType.gradeStructure.courseId,
     };
 
-    if (isEmpty(allowRoles)) {
-      return true;
-    }
-
     if (allowRoles.flat().some((_role) => _role === role)) {
       return true;
     }
