@@ -16,6 +16,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'utils/prisma';
 import { Stream } from 'stream';
 import {
+  GradeReviewStatus,
   GradeStatus,
   PrismaClient,
   StudentCard,
@@ -167,7 +168,6 @@ export class GradeStudentService implements IGradeStudentService {
             id: true,
             percentage: true,
             label: true,
-            status: true,
           },
         },
       },
@@ -207,6 +207,11 @@ export class GradeStudentService implements IGradeStudentService {
       },
       select: {
         point: true,
+        gradeReviews: {
+          where: {
+            status: GradeReviewStatus.DONE,
+          },
+        },
       },
     });
 
@@ -243,7 +248,9 @@ export class GradeStudentService implements IGradeStudentService {
     return {
       point: userCourseGrade.point,
       studentId: user.studentCard.studentId,
-      status: gradeType.status,
+      status: isEmpty(userCourseGrade.gradeReviews)
+        ? GradeReviewStatus.REQUEST
+        : GradeReviewStatus.DONE,
     };
   }
 
