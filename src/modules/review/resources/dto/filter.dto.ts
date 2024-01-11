@@ -17,3 +17,10 @@ export class GetGradeReviewFilterDto extends FilterDto {
   @IsString()
   gradeTypeId: string;
 }
+
+export class GetGradeReviewByTeacherFilterDto extends FilterDto {
+  @IsString()
+  gradeTypeId: string;
+  @IsString()
+  studentId: string;
+}

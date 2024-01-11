@@ -27,6 +27,7 @@ import {
   CreateGradeReviewResultDto,
   FilterDto,
   FinalizedGradeReviewDto,
+  GetGradeReviewByTeacherFilterDto,
   GetGradeReviewFilterDto,
   UpdateGradeReviewDto,
   UpdateGradeReviewResultDto,
@@ -41,6 +42,7 @@ import {
 } from '../services/commands';
 import { plainToInstance } from 'class-transformer';
 import {
+  GetGradeReviewByTeacherQuery,
   GetGradeReviewDetailQuery,
   GetGradeReviewQuery,
 } from '../services/queries';
@@ -67,6 +69,20 @@ export class ReviewController {
     return this._queryBus.execute(query);
   }
 
+  @UseGradeTypePolicies({
+    roles: [UserCourseRole.TEACHER, UserCourseRole.HOST],
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get('view')
+  getGradeReviewUsesByTeacher(
+    @Query() filter: GetGradeReviewByTeacherFilterDto,
+  ) {
+    const query = plainToInstance(GetGradeReviewByTeacherQuery, {
+      ...filter,
+    });
+    return this._queryBus.execute(query);
+  }
+
   @UseGradeTypePolicies({ roles: [UserCourseRole.STUDENT] })
   @HttpCode(HttpStatus.CREATED)
   @Post('')
@@ -85,7 +101,11 @@ export class ReviewController {
   }
 
   @UseGradeReviewPolicies({
-    roles: [UserCourseRole.HOST, UserCourseRole.TEACHER],
+    roles: [
+      UserCourseRole.HOST,
+      UserCourseRole.TEACHER,
+      UserCourseRole.STUDENT,
+    ],
   })
   @HttpCode(HttpStatus.OK)
   @Get('/:id')
