@@ -49,6 +49,6 @@ export class ReAssignGradeReviewResultCommandHandler
     };
 
     await this._fireStore.create('notifications', event);
-    return res;
+    return gradeReview;
   }
 }

@@ -68,6 +68,9 @@ export class CreateGradeReviewResultCommandHandler
           version: 'desc',
         },
       ],
+      include: {
+        teacher: true,
+      },
     });
 
     return events[0];
