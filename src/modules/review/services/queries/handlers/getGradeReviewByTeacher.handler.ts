@@ -21,6 +21,7 @@ export class GradeReviewInCourseOfStudentQueryHandler
         studentId: query.studentId,
       },
       include: {
+        gradeType: true,
         gradeReviews: {
           include: {
             gradeReviewResults: true,
