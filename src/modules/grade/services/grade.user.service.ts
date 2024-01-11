@@ -16,6 +16,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'utils/prisma';
 import { Stream } from 'stream';
 import {
+  GradeReview,
   GradeReviewStatus,
   GradeStatus,
   PrismaClient,
@@ -138,7 +139,7 @@ export class GradeStudentService implements IGradeStudentService {
       select: {
         studentId: true,
         point: true,
-        gradeType: {
+        gradeReviews: {
           select: {
             status: true,
           },
@@ -146,9 +147,9 @@ export class GradeStudentService implements IGradeStudentService {
       },
     });
 
-    const res = userCourseGrade.map(({ gradeType, ...payload }) => ({
+    const res = userCourseGrade.map(({ gradeReviews, ...payload }) => ({
       ...payload,
-      status: gradeType.status,
+      status: this._getGradeReviewStatus(gradeReviews),
     }));
     return res;
   }
@@ -208,8 +209,8 @@ export class GradeStudentService implements IGradeStudentService {
       select: {
         point: true,
         gradeReviews: {
-          where: {
-            status: GradeReviewStatus.DONE,
+          select: {
+            status: true,
           },
         },
       },
@@ -245,12 +246,11 @@ export class GradeStudentService implements IGradeStudentService {
       );
     }
 
+    console.log(userCourseGrade);
     return {
       point: userCourseGrade.point,
       studentId: user.studentCard.studentId,
-      status: isEmpty(userCourseGrade.gradeReviews)
-        ? GradeReviewStatus.REQUEST
-        : GradeReviewStatus.DONE,
+      status: this._getGradeReviewStatus(userCourseGrade.gradeReviews),
     };
   }
 
@@ -462,5 +462,17 @@ export class GradeStudentService implements IGradeStudentService {
       ext: 'xlsx',
       fileName: 'import-grade.xlsx',
     };
+  }
+
+  private _getGradeReviewStatus(gradeReviews: { status: string }[]): string {
+    if (isEmpty(gradeReviews)) {
+      return 'NOREVIEWS';
+    }
+
+    if (gradeReviews.every(({ status }) => status === 'DONE')) {
+      return 'DONE';
+    }
+
+    return 'REQUEST';
   }
 }
