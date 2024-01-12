@@ -66,6 +66,7 @@ export class GradeStructureService implements IGradeStructureService {
         id: gradeStructureId,
       },
       select: {
+        courseId: true,
         course: {
           select: {
             userCourses: {
@@ -108,7 +109,7 @@ export class GradeStructureService implements IGradeStructureService {
       recipientIds: receiverIds,
       content: `The grade composition has mark as finalized`,
       type: 'notification',
-      redirectEndpoint: `/grade/${gradeStructureId}`,
+      redirectEndpoint: `/home/course/${gradeStructure.courseId}#points`,
       status: 'processing',
       title: 'Finalized Grade Composition',
       isPublished: false,

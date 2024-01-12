@@ -70,6 +70,7 @@ export class GradeTypeService implements IGradeTypeService {
       select: {
         gradeStructure: {
           select: {
+            courseId: true,
             course: {
               select: {
                 userCourses: {
@@ -112,7 +113,7 @@ export class GradeTypeService implements IGradeTypeService {
       recipientIds: receiverIds,
       content: `The Exam has mark as finalized`,
       type: 'notification',
-      redirectEndpoint: `/grade/type/${gradeTypeId}`,
+      redirectEndpoint: `/home/course/${gradeType.gradeStructure.courseId}#points`,
       status: 'processing',
       title: 'Finalized Exam',
       isPublished: false,

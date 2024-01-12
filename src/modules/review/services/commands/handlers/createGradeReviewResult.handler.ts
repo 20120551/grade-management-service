@@ -39,13 +39,26 @@ export class CreateGradeReviewResultCommandHandler
     );
     await this._gradeReviewRepo.persist(gradeReview);
 
+    const userCourseGrade =
+      await this._prismaService.userCourseGrade.findUnique({
+        where: {
+          id: gradeReview.userCourseGradeId,
+        },
+        select: {
+          courseId: true,
+          studentId: true,
+          gradeTypeId: true,
+        },
+      });
     // TODO: add firebase event
     const event: NotificationTemplate = {
       senderId: command.teacherId,
       recipientIds: [gradeReview.userId],
       content: `Teacher make a grade review for your request`,
       type: 'notification',
-      redirectEndpoint: `/grade/review/${gradeReview.id}`,
+      redirectEndpoint: `/home/course/${userCourseGrade.courseId}#points?
+      studentid=${userCourseGrade.studentId}&gradeTypeId=${userCourseGrade.gradeTypeId}&
+      gradeReviewId=${gradeReview.id}`,
       status: 'processing',
       title: 'Grade review result',
       isPublished: false,

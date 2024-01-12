@@ -8,6 +8,7 @@ import { ReAssignGradeReviewResultEvent } from 'modules/review/entities/events';
 import { Inject } from '@nestjs/common';
 import { IFirebaseFireStoreService } from 'utils/firebase';
 import { NotificationTemplate } from 'modules/grade/resources/events';
+import { PrismaService } from 'utils/prisma';
 
 @CommandHandler(ReAssignGradeReviewResultCommand)
 export class ReAssignGradeReviewResultCommandHandler
@@ -18,6 +19,7 @@ export class ReAssignGradeReviewResultCommandHandler
     private readonly _gradeReviewRepo: IGradeReviewRepo,
     @Inject(IFirebaseFireStoreService)
     private readonly _fireStore: IFirebaseFireStoreService,
+    private readonly _prismaService: PrismaService,
   ) {}
 
   async execute(
@@ -35,6 +37,19 @@ export class ReAssignGradeReviewResultCommandHandler
     gradeReview.reAssignGradeReview(
       plainToInstance(ReAssignGradeReviewResultEvent, command),
     );
+
+    const userCourseGrade =
+      await this._prismaService.userCourseGrade.findUnique({
+        where: {
+          id: gradeReview.userCourseGradeId,
+        },
+        select: {
+          courseId: true,
+          studentId: true,
+          gradeTypeId: true,
+        },
+      });
+
     const res = await this._gradeReviewRepo.persist(gradeReview);
     // TODO: add firebase event
     const event: NotificationTemplate = {
@@ -42,7 +57,9 @@ export class ReAssignGradeReviewResultCommandHandler
       recipientIds: [gradeReview.userId],
       content: `Teacher has re-assign your grade review`,
       type: 'notification',
-      redirectEndpoint: `/grade/review/${gradeReview.id}`,
+      redirectEndpoint: `/home/course/${userCourseGrade.courseId}#points?
+      studentid=${userCourseGrade.studentId}&gradeTypeId=${userCourseGrade.gradeTypeId}&
+      gradeReviewId=${gradeReview.id}`,
       status: 'processing',
       title: 'Grade review result',
       isPublished: false,
