@@ -53,4 +53,16 @@ export class GradeReviewInCourseOfStudentQueryHandler
       })
       .filter(Boolean);
   }
+
+  private _getGradeReviewStatus(gradeReviews: { status: string }[]): string {
+    if (isEmpty(gradeReviews)) {
+      return 'NOREVIEWS';
+    }
+
+    if (gradeReviews.every(({ status }) => status === 'DONE')) {
+      return 'DONE';
+    }
+
+    return 'REQUEST';
+  }
 }
