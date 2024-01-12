@@ -24,7 +24,11 @@ export class GradeReviewInCourseOfStudentQueryHandler
         gradeType: true,
         gradeReviews: {
           include: {
-            gradeReviewResults: true,
+            gradeReviewResults: {
+              include: {
+                teacher: true,
+              },
+            },
           },
         },
       },
