@@ -46,6 +46,7 @@ export class ReAssignGradeReviewResultCommandHandler
       status: 'processing',
       title: 'Grade review result',
       isPublished: false,
+      isRead: false,
     };
 
     await this._fireStore.create('notifications', event);

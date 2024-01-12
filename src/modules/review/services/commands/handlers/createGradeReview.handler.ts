@@ -77,6 +77,7 @@ export class CreateGradeReviewCommandHandler
       status: 'processing',
       title: 'New grade for you to review',
       isPublished: false,
+      isRead: false,
     };
 
     await this._fireStore.create('notifications', event);

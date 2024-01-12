@@ -112,6 +112,7 @@ export class GradeStructureService implements IGradeStructureService {
       status: 'processing',
       title: 'Finalized Grade Composition',
       isPublished: false,
+      isRead: false,
     };
     const eventCreated = await this._fireStore.create('notifications', event);
     console.log('Publishing the event: ', eventCreated);

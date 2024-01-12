@@ -116,6 +116,7 @@ export class GradeTypeService implements IGradeTypeService {
       status: 'processing',
       title: 'Finalized Exam',
       isPublished: false,
+      isRead: false,
     };
 
     const eventCreated = await this._fireStore.create('notifications', event);

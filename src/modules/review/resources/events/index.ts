@@ -9,4 +9,5 @@ export interface NotificationTemplate {
   content: string;
   status: EventStatus;
   isPublished: false;
+  isRead: false;
 }
