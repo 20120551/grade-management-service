@@ -3,6 +3,7 @@ import { UserCourseGrade } from '@prisma/client';
 import { BadRequestException } from 'utils/errors/domain.error';
 import { GetGradeReviewQuery } from '../getGradeReview.query';
 import { PrismaService } from 'utils/prisma';
+import { isEmpty } from 'lodash';
 
 @QueryHandler(GetGradeReviewQuery)
 export class GradeReviewQueryHandler
@@ -33,6 +34,7 @@ export class GradeReviewQueryHandler
           },
         },
         include: {
+          gradeType: true,
           gradeReviews: {
             take: query.take,
             skip: query.skip,
@@ -53,6 +55,21 @@ export class GradeReviewQueryHandler
       );
     }
 
-    return userCourseGrade;
+    return {
+      ...userCourseGrade,
+      status: this._getGradeReviewStatus(userCourseGrade.gradeReviews),
+    } as any;
+  }
+
+  private _getGradeReviewStatus(gradeReviews: { status: string }[]): string {
+    if (isEmpty(gradeReviews)) {
+      return 'NOREVIEWS';
+    }
+
+    if (gradeReviews.every(({ status }) => status === 'DONE')) {
+      return 'DONE';
+    }
+
+    return 'REQUEST';
   }
 }
