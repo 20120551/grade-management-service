@@ -74,9 +74,7 @@ export class CreateGradeReviewCommandHandler
       recipientIds: teacherIds.map((teacher) => teacher.userId),
       content: `Student make a grade review for you`,
       type: 'notification',
-      redirectEndpoint: `/home/course/${courseId}#points?
-      studentid=${user.studentId}&gradeTypeId=${userCourseGrade.gradeTypeId}&
-      gradeReviewId=${gradeReview.id}`,
+      redirectEndpoint: `/home/course/${courseId}#points?studentid=${user.studentId}&gradeTypeId=${userCourseGrade.gradeTypeId}&gradeReviewId=${gradeReview.id}`,
       status: 'processing',
       title: 'New grade for you to review',
       isPublished: false,

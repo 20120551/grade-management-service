@@ -53,9 +53,7 @@ export class FinalizedGradeReviewCommandHandler
       recipientIds: [res.userId],
       content: `Teacher mark your grade review request as done`,
       type: 'notification',
-      redirectEndpoint: `/home/course/${res.userCourseGrade.courseId}#points?
-      studentid=${res.userCourseGrade.studentId}&gradeTypeId=${res.userCourseGrade.gradeTypeId}&
-      gradeReviewId=${res.id}`,
+      redirectEndpoint: `/home/course/${res.userCourseGrade.courseId}#points?studentid=${res.userCourseGrade.studentId}&gradeTypeId=${res.userCourseGrade.gradeTypeId}&gradeReviewId=${res.id}`,
       status: 'processing',
       title: 'Grade review result',
       isPublished: false,

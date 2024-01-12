@@ -57,9 +57,7 @@ export class ReAssignGradeReviewResultCommandHandler
       recipientIds: [gradeReview.userId],
       content: `Teacher has re-assign your grade review`,
       type: 'notification',
-      redirectEndpoint: `/home/course/${userCourseGrade.courseId}#points?
-      studentid=${userCourseGrade.studentId}&gradeTypeId=${userCourseGrade.gradeTypeId}&
-      gradeReviewId=${gradeReview.id}`,
+      redirectEndpoint: `/home/course/${userCourseGrade.courseId}#points?studentid=${userCourseGrade.studentId}&gradeTypeId=${userCourseGrade.gradeTypeId}&gradeReviewId=${gradeReview.id}`,
       status: 'processing',
       title: 'Grade review result',
       isPublished: false,
