@@ -447,9 +447,13 @@ export class GradeStructureService implements IGradeStructureService {
         return true;
       }
 
-      return gradeSubTypes.some(canMarkAsFinalizeFilter);
+      if (isEmpty(gradeSubTypes)) {
+        return true;
+      }
+
+      return gradeSubTypes.every(canMarkAsFinalizeFilter);
     };
-    const canMarkAsFinalize = gradeTypes.some(canMarkAsFinalizeFilter);
+    const canMarkAsFinalize = gradeTypes.every(canMarkAsFinalizeFilter);
     return canMarkAsFinalize;
   }
 }

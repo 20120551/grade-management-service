@@ -404,9 +404,9 @@ export class GradeTypeService implements IGradeTypeService {
         return true;
       }
 
-      return gradeSubTypes.some(canMarkAsFinalizeFilter);
+      return gradeSubTypes.every(canMarkAsFinalizeFilter);
     };
-    const canMarkAsFinalize = gradeTypes.some(canMarkAsFinalizeFilter);
+    const canMarkAsFinalize = gradeTypes.every(canMarkAsFinalizeFilter);
     return canMarkAsFinalize;
   }
 }
